@@ -37,7 +37,7 @@ namespace Expedition.Core.Services
 		/// <summary>
 		/// Text writer for checksum output
 		/// </summary>
-		public TextWriter HashOutput { get; set; }
+		//public TextWriter HashOutput { get; set; }
 
 		/// <summary>
 		/// Text writer for status logging output
@@ -47,7 +47,12 @@ namespace Expedition.Core.Services
 		/// <summary>
 		/// Enable verbose status logging
 		/// </summary>
-		public bool Verbose { get; set; }
+		public bool Verbose { get; set; } = false;
+
+		/// <summary>
+		/// Checks access without creating hashes
+		/// </summary>
+		public bool Preview { get; set; } = false;
 	}
 
 	public class CreateChecksumsResponse
@@ -55,8 +60,8 @@ namespace Expedition.Core.Services
 		public DateTime Started { get; set; }
 		public DateTime Completed { get; set; }
 
-		public TextWriter HashOutput { get; set; }
 		public TextWriter LogOutput { get; set; }
+		public string OutputFileUri { get; set; }
 
 		public string[] Files { get; set; }
 		public Dictionary<string, Exception> Errors { get; set; } = new Dictionary<string, Exception>();
@@ -68,7 +73,7 @@ namespace Expedition.Core.Services
 		{
 			Started = DateTime.UtcNow;
 			LogOutput = request.LogOutput;
-			HashOutput = request.HashOutput;
+			//HashOutput = request.HashOutput;
 		}
 	}
 
@@ -82,36 +87,68 @@ namespace Expedition.Core.Services
 			_request = request;
 			_response = new CreateChecksumsResponse(request);
 
-			Execute();
+			Validate();
 
-			_response.Completed = DateTime.UtcNow;
+			Generate();
+
+			Complete();
+
 			return _response;
 		}
 
-		private void Execute()
+		private void Complete()
+		{
+			_response.Completed = DateTime.UtcNow;
+		}
+
+		private void Validate()
+		{
+			// check input uri
+			var dir = _request.DirectoryUri;
+			if (String.IsNullOrWhiteSpace(dir)) throw new Exception($"Input URI is not provided");
+			if (!Directory.Exists(dir)) throw new Exception($"Input URI '{dir}' is not accessible");
+
+			// check output uri
+			var root = _request.RelativeToUri;
+			if (!String.IsNullOrWhiteSpace(root))
+			{
+				if (!Directory.Exists(root)) throw new Exception($"Output URI '{root}' is not accessible");
+				if (!ParsePath.IsSamePath(root, dir) && !ParsePath.IsAncestor(root, dir)) throw new Exception($"Input URI '{root}' is not ancestor of output URI '{dir}'");
+			}
+
+			// check output file
+			var now = DateTime.Now;
+			var ext = _request.HashType.ToString().ToLowerInvariant();
+			var path = String.IsNullOrWhiteSpace(root) 
+				? dir 
+				: root;
+			var file = Path.Combine(path, $"_{now:yyyyMMdd}-{now:HHmmss}.{ext}");
+			if (File.Exists(file)) throw new Exception($"Output file '{file}' already exists");
+			_response.OutputFileUri = file;
+		}
+
+		private void Generate()
 		{
 			// set up paths
 			var truncate = 0;
 			var root = _request.RelativeToUri;
 			if (!String.IsNullOrWhiteSpace(root))
-			{
-				// TODO ensure DirectoryUri is child of RelativeToUri
-				if (!root.EndsWith(Path.PathSeparator.ToString())) root += Path.PathSeparator;
-				truncate = root.Length;
-			}
+				truncate = ParsePath.FixUri(root, true).Length;
 
 			// set up logging
 			var log = _request.LogOutput;
 			var verbose = _request.Verbose;
 
 			// set up hashing
-			var output = _request.HashOutput;
+			StreamWriter output = null;
+			if (!_request.Preview) output = File.CreateText(_response.OutputFileUri);
+
 			var hasher = _request.HashType.ToString();
 			using (var algorithm = HashCalc.GetHashAlgorithm(_request.HashType))
 			{
-				output?.WriteLineAsync($"# Generated with Expedition at {DateTime.UtcNow}");
-				output?.WriteLineAsync($"# https://github.com/DesignedSimplicity/Expedition/");
-				output?.WriteLineAsync("");
+				output?.WriteLine($"# Generated with Expedition at {DateTime.UtcNow}");
+				output?.WriteLine($"# https://github.com/DesignedSimplicity/Expedition/");
+				output?.WriteLine("");
 
 				// set up searching
 				var searchPattern = _request.FilePattern ?? "*.*";
@@ -123,19 +160,25 @@ namespace Expedition.Core.Services
 				foreach (var file in _response.Files)
 				{
 					count++;
-					log?.WriteAsync($"{count}. {file}");
+					log?.Write($"{count}. {file}");
 
-					// calculate hash
-					var hash = HashCalc.GetHash(file, algorithm);
+					// calculate hash and output hash to log
+					var hash = (_request.Preview
+						? hasher
+						: HashCalc.GetHash(file, algorithm));
+					log?.WriteLine($" -> {hasher} = {hash}");
 
-					log?.WriteLineAsync($" -> {hasher} = {hash}");
-
-					// write checksum
+					// format and write checksum to stream
 					var path = (truncate == 0
 						? file
 						: "*" + file.Substring(truncate));
-					output?.WriteLineAsync($"{hash} {path}");
+					output?.WriteLine($"{hash} {path}");
 				}
+
+				// clean up output file
+				output?.Flush();
+				output?.Close();
+				output?.Dispose();
 			}
 		}
 	}

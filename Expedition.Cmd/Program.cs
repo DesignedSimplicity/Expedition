@@ -16,11 +16,12 @@ namespace Expedition.Cmd
 			var create = new CreateChecksums();
 			create.Create(new CreateChecksumsRequest()
 			{
-				DirectoryUri = @"C:\Apps",
-				RelativeToUri = @"C:\Apps",
+				DirectoryUri = @"C:\Apps\",
+				RelativeToUri = @"C:\Apps\",
 				//HashType = Core.HashType.Sha1,
-				//LogOutput = Console.Out
-				HashOutput = Console.Out
+				LogOutput = Console.Out
+				//HashOutput = Console.Out,
+				//Preview = true
 			});
 		}
 	}
