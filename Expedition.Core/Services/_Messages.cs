@@ -7,12 +7,52 @@ using System.Threading.Tasks;
 
 namespace Expedition.Core.Services
 {
+	public class QueryFileSystemRequest
+	{
+		/// <summary>
+		/// Ignore file system access errors
+		/// </summary>
+		public bool Silent { get; set; } = false;
+
+		/// <summary>
+		/// Manual recursion with status report
+		/// </summary>
+		public bool Verbose { get; set; } = false;
+
+		/// <summary>
+		/// Recurse directory
+		/// </summary>
+		public bool Recursive { get; set; }
+
+		/// <summary>
+		/// File matching pattern
+		/// </summary>
+		public string FilePattern { get; set; }
+
+		/// <summary>
+		/// Initial directory
+		/// </summary>
+		public string DirectoryUri { get; set; }
+	}
+
+	public class QueryFileSystemResponse
+	{
+		public FileInfo[] Files { get; set; }
+
+		public Dictionary<string, Exception> Exceptions { get; set; } = new Dictionary<string, Exception>();
+	}
+
 	public class CreateChecksumsRequest
 	{
 		/// <summary>
 		/// Decides which hash algorithm to use
 		/// </summary>
 		public HashType HashType { get; set; } = HashType.Md5;
+
+		/// <summary>
+		/// Continue processing on error
+		/// </summary>
+		public bool Silent { get; set; } = false;
 
 		/// <summary>
 		/// Recurse into subdirectories
@@ -54,7 +94,7 @@ namespace Expedition.Core.Services
 	{
 		public CreateChecksumsRequest Request { get; private set; }
 
-		public string[] Files { get; set; }
+		public FileInfo[] Files { get; set; }
 
 		public Dictionary<string, Exception> Errors { get; private set; }
 
@@ -104,7 +144,7 @@ namespace Expedition.Core.Services
 
 		public string OutputFileUri { get; set; }
 
-		public string[] Files { get; private set; }
+		public FileInfo[] Files { get; private set; }
 		public Dictionary<string, Exception> Errors { get; private set; }
 
 		public bool HasFiles { get { return Files.Length > 0; } }

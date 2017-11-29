@@ -9,33 +9,28 @@ namespace Expedition.Core.Services
 {
 	public class CreateChecksums
 	{
-		private CreateChecksumsExecute _execute;
-		private CreateChecksumsRequest _request;
-
 		public CreateChecksumsResponse Execute(CreateChecksumsRequest request)
 		{
-			_execute = new CreateChecksumsExecute(request);
+			var execute = new CreateChecksumsExecute(request);
 
-			_request = request;
+			Validate(execute);
 
-			Validate();
+			Generate(execute);
 
-			Generate();
+			Complete(execute);
 
-			Complete();
-
-			return new CreateChecksumsResponse(_execute);
+			return new CreateChecksumsResponse(execute);
 		}
 
-		private void Validate()
+		private void Validate(CreateChecksumsExecute execute)
 		{
 			// check input uri
-			var dir = _execute.Request.DirectoryUri;
+			var dir = execute.Request.DirectoryUri;
 			if (String.IsNullOrWhiteSpace(dir)) throw new Exception($"Input URI is not provided");
 			if (!Directory.Exists(dir)) throw new Exception($"Input URI '{dir}' is not accessible");
 
 			// check output uri
-			var root = _execute.Request.RelativeToUri;
+			var root = execute.Request.RelativeToUri;
 			if (!String.IsNullOrWhiteSpace(root))
 			{
 				if (!Directory.Exists(root)) throw new Exception($"Output URI '{root}' is not accessible");
@@ -44,55 +39,59 @@ namespace Expedition.Core.Services
 
 			// check output file
 			var now = DateTime.Now;
-			var ext = _execute.Request.HashType.ToString().ToLowerInvariant();
+			var ext = execute.Request.HashType.ToString().ToLowerInvariant();
 			var path = String.IsNullOrWhiteSpace(root)
 				? dir
 				: root;
 			var file = Path.Combine(path, $"_{now:yyyyMMdd}-{now:HHmmss}.{ext}");
 			if (File.Exists(file)) throw new Exception($"Output file '{file}' already exists");
-			_execute.OutputFileUri = file;
+			execute.OutputFileUri = file;
 		}
 
-		private void Generate()
+		private void Generate(CreateChecksumsExecute execute)
 		{
 			// set up hashing
 			StreamWriter output = null;
-			if (!_execute.Request.Preview) output = File.CreateText(_execute.OutputFileUri);
+			if (!execute.Request.Preview) output = File.CreateText(execute.OutputFileUri);
 
-			var hasher = _execute.Request.HashType.ToString();
-			using (var algorithm = HashCalc.GetHashAlgorithm(_execute.Request.HashType))
+			var hasher = execute.Request.HashType.ToString();
+			using (var algorithm = HashCalc.GetHashAlgorithm(execute.Request.HashType))
 			{
 				output?.WriteLine($"# Generated {hasher} with Expedition at {DateTime.UtcNow}");
 				output?.WriteLine($"# https://github.com/DesignedSimplicity/Expedition/");
 				output?.WriteLine("");
 
-				// set up searching
-				var searchPattern = _request.FilePattern ?? "*.*";
-				var searchOption = _request.Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+				var search = new QueryFileSystem();
+				var fileResult = search.Execute(new QueryFileSystemRequest()
+				{
+					DirectoryUri = execute.Request.DirectoryUri,
+					Recursive = execute.Request.Recursive,
+					FilePattern = execute.Request.FilePattern,
+				});
 
 				// enumerate and hash files
 				int count = 0;
-				_execute.Files = Directory.GetFiles(_request.DirectoryUri, searchPattern, searchOption);
-				foreach (var file in _execute.Files)
+				execute.Files = fileResult.Files;
+				foreach (var file in execute.Files)
 				{
 					try
 					{
 						count++;
-						_execute.Log($"{count}. {file} -> {hasher} = ");
+						execute.Log($"{count}. {file} -> {hasher} = ");
 
 						// calculate hash and output hash to log
-						var hash = (_request.Preview
+						var hash = (execute.Request.Preview
 							? hasher
-							: HashCalc.GetHash(file, algorithm));
-						_execute.LogLine(hash);
+							: HashCalc.GetHash(file.FullName, algorithm));
+						execute.LogLine(hash);
 
 						// format and write checksum to stream
-						var path = _execute.GetRelativePath(file);
+						var path = execute.GetRelativePath(file.FullName);
 						output?.WriteLine($"{hash} {path}");
 					}
 					catch (Exception ex)
 					{
-						_execute.LogError(file, ex);
+						execute.LogError(file.FullName, ex);
 					}
 				}
 
@@ -103,13 +102,13 @@ namespace Expedition.Core.Services
 			}
 		}
 
-		private void Complete()
+		private void Complete(CreateChecksumsExecute execute)
 		{
 			// mark as completed
 			//_response.Completed = DateTime.UtcNow;
 
 			// show simple summary
-			var log = _request.LogStream;
+			var log = execute.Request.LogStream;
 			//log?.WriteLine("Created");
 		}
 	}
