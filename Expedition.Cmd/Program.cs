@@ -17,6 +17,7 @@ namespace Expedition.Cmd
 			{
 				DirectoryUri = @"C:\Apps\",
 				RelativeToUri = @"C:\Apps\",
+				Recursive = true,
 				//HashType = Core.HashType.Sha1,
 				LogStream = Console.Out
 				//HashOutput = Console.Out,

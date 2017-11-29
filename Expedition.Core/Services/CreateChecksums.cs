@@ -61,13 +61,10 @@ namespace Expedition.Core.Services
 				output?.WriteLine($"# https://github.com/DesignedSimplicity/Expedition/");
 				output?.WriteLine("");
 
+				// query file system
 				var search = new QueryFileSystem();
-				var fileResult = search.Execute(new QueryFileSystemRequest()
-				{
-					DirectoryUri = execute.Request.DirectoryUri,
-					Recursive = execute.Request.Recursive,
-					FilePattern = execute.Request.FilePattern,
-				});
+				//TODO attach event handler here
+				var fileResult = search.Execute(execute.Request);
 
 				// enumerate and hash files
 				int count = 0;
