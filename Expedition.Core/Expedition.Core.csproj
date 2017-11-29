@@ -44,7 +44,9 @@
     <Compile Include="Parse\ParsePath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CreateChecksums.cs" />
+    <Compile Include="Services\RecurseDirectory.cs" />
     <Compile Include="Services\VerifyChecksums.cs" />
+    <Compile Include="Services\_Messages.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
