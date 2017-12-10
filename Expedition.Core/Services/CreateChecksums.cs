@@ -33,7 +33,7 @@ namespace Expedition.Core.Services
 			var root = execute.Request.RelativeToUri;
 			if (!String.IsNullOrWhiteSpace(root))
 			{
-				if (!Directory.Exists(root)) throw new Exception($"Output URI '{root}' is not accessible");
+				if (!Directory.Exists(execute.Request.RelativeToUri)) throw new Exception($"Output URI '{root}' is not accessible");
 				if (!ParsePath.IsSamePath(root, dir) && !ParsePath.IsAncestor(root, dir)) throw new Exception($"Input URI '{root}' is not ancestor of output URI '{dir}'");
 			}
 
@@ -71,10 +71,14 @@ namespace Expedition.Core.Services
 				execute.Files = fileResult.Files;
 				foreach (var file in execute.Files)
 				{
+					// exclude/skip output file
+					if (String.Compare(execute.OutputFileUri, file.FullName, true) == 0)
+						continue;
+
 					try
 					{
 						count++;
-						execute.Log($"{count}. {file} -> {hasher} = ");
+						execute.Log($"{count}. {file.FullName} -> {hasher} = ");
 
 						// calculate hash and output hash to log
 						var hash = (execute.Request.Preview
@@ -83,7 +87,7 @@ namespace Expedition.Core.Services
 						execute.LogLine(hash);
 
 						// format and write checksum to stream
-						var path = execute.GetRelativePath(file.FullName);
+						var path = execute.GetOuputPath(file.FullName);
 						output?.WriteLine($"{hash} {path}");
 					}
 					catch (Exception ex)

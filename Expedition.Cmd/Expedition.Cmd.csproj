@@ -7,7 +7,7 @@
     <ProjectGuid>{DE207CB5-BF0B-47FD-A5E5-B23DBC16DCAE}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Expedition.Cmd</RootNamespace>
-    <AssemblyName>Expedition.Cmd</AssemblyName>
+    <AssemblyName>Scout</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Arguments.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

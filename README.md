@@ -1,18 +1,38 @@
 # Expedition
-A simple application to take a snapshot of a file system and create or verify md5/sh1 file hashes
-
-Goals of this project:
-1. Create and verify md5 and sh1 file content hashes
-2. Snapshot file metadata (size/date/etc) for offline backups
+A simple set of applications to take a snapshot of a file system and create or verify md5/sh1 file hashes
 
 
-Usage
-Expedition.exe C:\Test\	-md5						Creates an md5 file named C:\Test\_YYYYMMDDHHMMSS.md5 for all files in directory recursively
-Expedition.exe C:\Test\ -sh1						Uses the sh1 algorithm and output file type
+Scout
+=====
+Create and verify md5 and sh1 file content hashes from the command line
 
-Expedition.exe C:\Test\ C:\MyFileName.md5			Creates an md5 file named C:\MyFileName.md5 and makes the paths relative to this location
-Expedition.exe C:\Test\ C:\MyFileName.sh1			Uses the sh1 algorithm and output file type
+Lookout
+=======
+Manage creation and verification output with simple Windows user interface
 
-Expedition.exe										Looks for an md5 or sh1 file in the current directory to verify
-Expedition.exe C:\MyFileName.md5					Verifies the md5 or sh1 file referenced against the current directory
-Expedition.exe C:\MyFileName.md5 C:\Test
+Navigator
+=========
+Load and save snapshots of file metadata (size/date/etc) for offline backups
+
+Commander
+=========
+Compare file system snapshots against each other or to current live file data
+
+
+
+Useage
+~~~~~~
+Scout.exe						Prompts to verify any/all md5|sha1 files in current directory then prompts to create a new md5 file of current directory
+
+Scout.exe .						Auto-creates a new md5 file of the current directory
+Scout.exe C:\Folder\			Creates a new md5 file of the specified directory relative to the current directory
+
+Scout.exe File.md5				Verifies an existing md5 file against relative to current directory, prompt to create if does not exist
+Scout.exe File.sha1				Verifies an existing sha1 file against relative to current directory, prompt to create if does not exist
+
+Switches
+--------
+-sha1							Uses the sha1 hash and file output type (-1)
+-abolute						Creates absolute file paths in hash file (-a)
+-preview						Executes the request without generating hashes (-p)
+-verbose						Ouputs detailed summary after hash creation or verification (-v)

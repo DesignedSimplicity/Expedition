@@ -58,8 +58,7 @@ namespace Expedition.Core.Services
 
 		public void LogError(string uri, Exception ex) { Exceptions.Add(uri, ex); LogLine($"ERROR: {uri} @ {ex.Message}"); }
 
-
-		public string GetRelativePath(string uri) { return uri.Substring(_truncateLength); }
+		public string GetOuputPath(string uri) { return _truncateLength > 0 ? uri.Substring(_truncateLength) : uri; }
 
 		public void Dispose()
 		{

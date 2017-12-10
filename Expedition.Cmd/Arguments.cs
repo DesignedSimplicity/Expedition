@@ -1,0 +1,110 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Expedition.Cmd
+{
+	public class Arguments
+	{
+		public bool Parse(string[] args)
+		{
+			// set defaults
+			HashType = Core.HashType.Md5;
+
+			// parse out 
+			if (args != null && args.Length > 0)
+			{
+				foreach (var arg in args)
+				{
+					var a = arg.ToLowerInvariant().Trim();
+					switch (a)
+					{
+						case ".":
+							DirectoryUri = ".";
+							break;
+						case "-1":
+						case "-sha1":
+							HashType = Core.HashType.Sha1;
+							break;
+						case "-p":
+						case "-preview":
+							IsPreview = true;
+							break;
+						case "-v":
+						case "-verbose":
+							IsPreview = true;
+							break;
+						case "-a":
+						case "-absolute":
+							IsAbsolutePath = true;
+							break;
+						default:
+							if (Directory.Exists(arg))
+								DirectoryUri = arg;
+
+							if (a.EndsWith(".md5") || a.EndsWith(".sha1"))
+								FileUri = arg.Trim();
+							break;
+					}
+				}
+			}
+
+			// check and return state
+			IsValid = PromptInput();
+			return IsValid;
+		}
+
+		private bool PromptYN()
+		{
+			var key = Console.ReadKey();
+			return (Char.ToUpperInvariant(key.KeyChar) == 'Y');
+		}
+
+		public bool PromptInput()
+		{
+			// neither specified
+			if (String.IsNullOrWhiteSpace(DirectoryUri) && String.IsNullOrWhiteSpace(FileUri))
+			{
+				Console.WriteLine("No file or directory specified.");
+				Console.Write("Would you like to auto-create a new hashfile in the current directory? (Y/n):");
+				if (PromptYN())
+				{
+					DirectoryUri = CurrentDirectoryUri;
+					return true;
+				}
+				else
+					return false;
+			}
+
+			return true;
+		}
+
+		public bool PromptOutput()
+		{
+			Console.WriteLine("Verbose was not specified and there were errors.");
+			Console.Write("Would you like to see a report of the errors? (Y/n):");
+			return PromptYN();
+		}
+
+		public bool IsValid { get; private set; }
+
+		public bool IsPreview { get; private set; }
+		public bool IsVerboseReport { get; private set; }
+		public bool IsAbsolutePath { get; private set; }
+		public Core.HashType HashType { get; private set; }
+
+		public string FileUri { get; private set; }
+		public string DirectoryUri { get; private set; }
+
+		public bool FileExists { get { return !String.IsNullOrWhiteSpace(FileUri) && File.Exists(FileUri); } }
+		public bool DirectoryExists { get { return !String.IsNullOrWhiteSpace(DirectoryUri) && Directory.Exists(DirectoryUri); } }
+
+		public bool IsDefaultDirectory { get { return DirectoryUri == "."; } }
+		public bool IsCurrentDirectory { get { return IsDefaultDirectory || String.Compare(CurrentDirectoryUri, DirectoryUri) == 0; } }
+		public string CurrentDirectoryUri { get { return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location); } }
+	}
+}
