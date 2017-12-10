@@ -14,7 +14,8 @@ namespace Expedition.Cmd
 	{
 		static void Main(string[] args)
 		{
-			args = new string[] { @"E:\_NEW\_KENNY\_20171210-202950.md5" }; // @"C:\Apps\", "-md5", "-a" };
+			Console.WriteLine(Environment.CurrentDirectory);
+			//args = new string[] { @"E:\_NEW\_KENNY\_20171210-202950.md5" }; // @"C:\Apps\", "-md5", "-a" };
 
 			// parse out command line options
 			var arguments = new Arguments();
@@ -71,7 +72,7 @@ namespace Expedition.Cmd
 		static ChecksumsResponse Create(Arguments arguments)
 		{
 			// get starting directory
-			var currentUri = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			var currentUri = arguments.CurrentDirectoryUri;
 			var directoryUri = arguments.IsCurrentDirectory
 				? currentUri
 				: arguments.DirectoryUri;

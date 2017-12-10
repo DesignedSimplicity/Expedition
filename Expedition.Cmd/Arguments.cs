@@ -54,13 +54,14 @@ namespace Expedition.Cmd
 			}
 
 			// check and return state
-			IsValid = PromptInput();
+			IsValid = !String.IsNullOrWhiteSpace(DirectoryUri) || !String.IsNullOrWhiteSpace(FileUri);
 			return IsValid;
 		}
 
 		private bool PromptYN()
 		{
 			var key = Console.ReadKey();
+			Console.WriteLine();
 			return (Char.ToUpperInvariant(key.KeyChar) == 'Y');
 		}
 
@@ -73,14 +74,12 @@ namespace Expedition.Cmd
 				Console.Write("Would you like to auto-create a new hashfile in the current directory? (Y/n):");
 				if (PromptYN())
 				{
-					DirectoryUri = CurrentDirectoryUri;
-					return true;
+					DirectoryUri = Environment.CurrentDirectory;
+					IsValid = true;
 				}
-				else
-					return false;
 			}
 
-			return true;
+			return IsValid;
 		}
 
 		public bool PromptOutput()
@@ -105,6 +104,6 @@ namespace Expedition.Cmd
 
 		public bool IsDefaultDirectory { get { return DirectoryUri == "."; } }
 		public bool IsCurrentDirectory { get { return IsDefaultDirectory || String.Compare(CurrentDirectoryUri, DirectoryUri) == 0; } }
-		public string CurrentDirectoryUri { get { return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location); } }
+		public string CurrentDirectoryUri { get { return Environment.CurrentDirectory; } }
 	}
 }
