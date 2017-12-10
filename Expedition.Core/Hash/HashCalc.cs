@@ -10,8 +10,8 @@ namespace Expedition.Core
 {
 	public enum HashType
 	{
-		Sha1 = 1,
-		Md5 = 5,
+		Sha1 = 40,
+		Md5 = 32,
 	}
 
 	public class HashCalc

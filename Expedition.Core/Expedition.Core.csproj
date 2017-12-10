@@ -43,10 +43,14 @@
     <Compile Include="Hash\HashCalc.cs" />
     <Compile Include="Parse\ParsePath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\BaseMessages.cs" />
     <Compile Include="Services\CreateChecksums.cs" />
+    <Compile Include="Services\CreateChecksumsMessages.cs" />
     <Compile Include="Services\QueryFileSystem.cs" />
+    <Compile Include="Services\QueryFileSystemMessages.cs" />
+    <Compile Include="Services\QueryHashSystem.cs" />
     <Compile Include="Services\VerifyChecksums.cs" />
-    <Compile Include="Services\_Messages.cs" />
+    <Compile Include="Services\VerifyChecksumsMessages.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

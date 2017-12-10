@@ -15,9 +15,7 @@ namespace Expedition.Core.Services
 
 			Validate(execute);
 
-			Generate(execute);
-
-			Complete(execute);
+			Execute(execute);
 
 			return new CreateChecksumsResponse(execute);
 		}
@@ -48,7 +46,7 @@ namespace Expedition.Core.Services
 			execute.OutputFileUri = file;
 		}
 
-		private void Generate(CreateChecksumsExecute execute)
+		private void Execute(CreateChecksumsExecute execute)
 		{
 			// set up hashing
 			StreamWriter output = null;
@@ -62,37 +60,39 @@ namespace Expedition.Core.Services
 				output?.WriteLine("");
 
 				// query file system
-				var search = new QueryFileSystem();
+				var query = new QueryFileSystem();
 				//TODO attach event handler here
-				var fileResult = search.Execute(execute.Request);
+				var queryResult = query.Execute(execute.Request);
 
 				// enumerate and hash files
 				int count = 0;
-				execute.Files = fileResult.Files;
+				execute.Files = queryResult.Files;
 				foreach (var file in execute.Files)
 				{
+					var fileName = file.FullName;
+
 					// exclude/skip output file
-					if (String.Compare(execute.OutputFileUri, file.FullName, true) == 0)
+					if (String.Compare(execute.OutputFileUri, fileName, true) == 0)
 						continue;
 
 					try
 					{
-						count++;
-						execute.Log($"{count}. {file.FullName} -> {hasher} = ");
+						count++;						
+						execute.Log($"{count}. {fileName} -> {hasher} = ");
 
 						// calculate hash and output hash to log
 						var hash = (execute.Request.Preview
 							? hasher
-							: HashCalc.GetHash(file.FullName, algorithm));
+							: HashCalc.GetHash(fileName, algorithm));
 						execute.LogLine(hash);
 
 						// format and write checksum to stream
-						var path = execute.GetOuputPath(file.FullName);
+						var path = execute.GetOuputPath(fileName);
 						output?.WriteLine($"{hash} {path}");
 					}
 					catch (Exception ex)
 					{
-						execute.LogError(file.FullName, ex);
+						execute.LogError(fileName, ex);
 					}
 				}
 
@@ -101,16 +101,6 @@ namespace Expedition.Core.Services
 				output?.Close();
 				output?.Dispose();
 			}
-		}
-
-		private void Complete(CreateChecksumsExecute execute)
-		{
-			// mark as completed
-			//_response.Completed = DateTime.UtcNow;
-
-			// show simple summary
-			var log = execute.Request.LogStream;
-			//log?.WriteLine("Created");
 		}
 	}
 }
