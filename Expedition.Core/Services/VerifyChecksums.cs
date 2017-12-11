@@ -133,6 +133,9 @@ namespace Expedition.Core.Services
 						execute.LogError(entry.Key, ex);
 					}
 				}
+
+				// save file list
+				execute.Files = files.ToArray();
 			}
 		}
 	}

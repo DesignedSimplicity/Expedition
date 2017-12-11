@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Expedition.Core.Services;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -38,12 +39,12 @@ namespace Expedition.Win
 			var f1 = new ListViewItem();
 			f1.Text = "File 1";
 			f1.ImageKey = "File";
-			listFIles.Items.Add(f1);
+			listFiles.Items.Add(f1);
 
 			var f2 = new ListViewItem();
 			f2.Text = "File 2";
 			f2.ImageKey = "FileError";
-			listFIles.Items.Add(f2);
+			listFiles.Items.Add(f2);
 
 
 			UpdateToolbarCommands();
@@ -93,6 +94,26 @@ namespace Expedition.Win
 
 		private void OpenFile(string uri)
 		{
+			var service = new VerifyChecksums();
+			var result = service.Execute(new VerifyChecksumsRequest()
+			{
+				FileUri = uri,
+				Preview = true,
+			});
+
+			listFiles.BeginUpdate();
+			listFiles.Items.Clear();
+			foreach (var file in result.Files)
+			{
+				var item = new ListViewItem();
+				item.Text = file.Name;
+				item.Tag = file.FullName;
+				item.ImageKey = "File";
+				item.SubItems.Add(file.Length.ToString());
+				item.SubItems.Add("");
+				listFiles.Items.Add(item);
+			}
+			listFiles.EndUpdate();
 		}
 
 		private void OpenDirectory(string uri)
@@ -117,6 +138,16 @@ namespace Expedition.Win
 			treeFolders.EndUpdate();
 		}
 
+		private void cmdLoad_Click(object sender, EventArgs e)
+		{
+			var pick = new OpenFileDialog();
+			if (pick.ShowDialog() == DialogResult.OK)
+			{
+				OpenFile(pick.FileName);
+			}
+		}
+
+
 		private void cmdOpen_Click(object sender, EventArgs e)
 		{
 			var pick = new FolderBrowserDialog();
@@ -134,9 +165,9 @@ namespace Expedition.Win
 				treeFolders.Nodes.Clear();
 				treeFolders.EndUpdate();
 
-				listFIles.BeginUpdate();
-				listFIles.Items.Clear();
-				listFIles.EndUpdate();
+				listFiles.BeginUpdate();
+				listFiles.Items.Clear();
+				listFiles.EndUpdate();
 			}
 		}
 	}

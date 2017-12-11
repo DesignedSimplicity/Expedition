@@ -36,7 +36,7 @@
 			this.treeFolders = new System.Windows.Forms.TreeView();
 			this.imageList = new System.Windows.Forms.ImageList(this.components);
 			this.splitSub = new System.Windows.Forms.SplitContainer();
-			this.listFIles = new System.Windows.Forms.ListView();
+			this.listFiles = new System.Windows.Forms.ListView();
 			this.colFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.colFileSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.colFileStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -146,7 +146,7 @@
 			// 
 			// splitSub.Panel1
 			// 
-			this.splitSub.Panel1.Controls.Add(this.listFIles);
+			this.splitSub.Panel1.Controls.Add(this.listFiles);
 			// 
 			// splitSub.Panel2
 			// 
@@ -157,20 +157,20 @@
 			// 
 			// listFIles
 			// 
-			this.listFIles.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.listFiles.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colFileName,
             this.colFileSize,
             this.colFileStatus});
-			this.listFIles.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.listFIles.FullRowSelect = true;
-			this.listFIles.GridLines = true;
-			this.listFIles.Location = new System.Drawing.Point(0, 0);
-			this.listFIles.Name = "listFIles";
-			this.listFIles.Size = new System.Drawing.Size(945, 544);
-			this.listFIles.SmallImageList = this.imageList;
-			this.listFIles.TabIndex = 0;
-			this.listFIles.UseCompatibleStateImageBehavior = false;
-			this.listFIles.View = System.Windows.Forms.View.Details;
+			this.listFiles.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.listFiles.FullRowSelect = true;
+			this.listFiles.GridLines = true;
+			this.listFiles.Location = new System.Drawing.Point(0, 0);
+			this.listFiles.Name = "listFIles";
+			this.listFiles.Size = new System.Drawing.Size(945, 544);
+			this.listFiles.SmallImageList = this.imageList;
+			this.listFiles.TabIndex = 0;
+			this.listFiles.UseCompatibleStateImageBehavior = false;
+			this.listFiles.View = System.Windows.Forms.View.Details;
 			// 
 			// colFileName
 			// 
@@ -241,6 +241,7 @@
 			this.cmdLoad.Size = new System.Drawing.Size(73, 36);
 			this.cmdLoad.Text = "Load";
 			this.cmdLoad.ToolTipText = "Load a checksum file";
+			this.cmdLoad.Click += new System.EventHandler(this.cmdLoad_Click);
 			// 
 			// cmdSave
 			// 
@@ -322,7 +323,7 @@
 		private System.Windows.Forms.SplitContainer splitMain;
 		private System.Windows.Forms.SplitContainer splitSub;
 		private System.Windows.Forms.TreeView treeFolders;
-		private System.Windows.Forms.ListView listFIles;
+		private System.Windows.Forms.ListView listFiles;
 		private System.Windows.Forms.ListView listLog;
 		private System.Windows.Forms.ToolStripButton cmdOpen;
 		private System.Windows.Forms.ToolStripButton cmdLoad;

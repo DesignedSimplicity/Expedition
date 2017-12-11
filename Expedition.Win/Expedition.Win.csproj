@@ -79,7 +79,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Expedition.Core\Expedition.Core.csproj">
+      <Project>{92f14769-ac56-4b1e-a830-0521cd61042c}</Project>
+      <Name>Expedition.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Open.png" />
   </ItemGroup>

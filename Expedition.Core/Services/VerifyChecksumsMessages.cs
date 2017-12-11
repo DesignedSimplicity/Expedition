@@ -45,12 +45,14 @@ namespace Expedition.Core.Services
 
 	public class VerifyChecksumsResponse : ChecksumsResponse
 	{
-		public List<FileInfo> Files { get; private set; } = new List<FileInfo>();
+		public FileInfo[] Files { get; private set; }
 
 		public string InputFileUri { get; set; }
 
 		public VerifyChecksumsResponse(VerifyChecksumsExecute execute)
 		{
+			Files = execute.Files;
+
 			Errors = execute.Exceptions;
 
 			InputFileUri = execute.InputFileUri;
