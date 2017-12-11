@@ -34,11 +34,14 @@
 			this.statusBar = new System.Windows.Forms.StatusStrip();
 			this.splitMain = new System.Windows.Forms.SplitContainer();
 			this.treeFolders = new System.Windows.Forms.TreeView();
+			this.imageList = new System.Windows.Forms.ImageList(this.components);
 			this.splitSub = new System.Windows.Forms.SplitContainer();
 			this.listFIles = new System.Windows.Forms.ListView();
+			this.colFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.colFileSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.colFileStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.listLog = new System.Windows.Forms.ListView();
 			this.toolBar = new System.Windows.Forms.ToolStrip();
-			this.txtPath = new System.Windows.Forms.ToolStripTextBox();
 			this.cmdOpen = new System.Windows.Forms.ToolStripButton();
 			this.cmdClose = new System.Windows.Forms.ToolStripButton();
 			this.cmdLoad = new System.Windows.Forms.ToolStripButton();
@@ -46,10 +49,7 @@
 			this.cmdCreate = new System.Windows.Forms.ToolStripButton();
 			this.cmdVerify = new System.Windows.Forms.ToolStripButton();
 			this.cmdReset = new System.Windows.Forms.ToolStripButton();
-			this.imageList = new System.Windows.Forms.ImageList(this.components);
-			this.colFileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.colFileSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.colFileStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.txtPath = new System.Windows.Forms.ToolStripTextBox();
 			this.toolStrips.BottomToolStripPanel.SuspendLayout();
 			this.toolStrips.ContentPanel.SuspendLayout();
 			this.toolStrips.TopToolStripPanel.SuspendLayout();
@@ -123,6 +123,20 @@
 			this.treeFolders.Size = new System.Drawing.Size(474, 875);
 			this.treeFolders.TabIndex = 0;
 			// 
+			// imageList
+			// 
+			this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
+			this.imageList.TransparentColor = System.Drawing.Color.Transparent;
+			this.imageList.Images.SetKeyName(0, "Root");
+			this.imageList.Images.SetKeyName(1, "Folder");
+			this.imageList.Images.SetKeyName(2, "FolderTemp");
+			this.imageList.Images.SetKeyName(3, "FolderGood");
+			this.imageList.Images.SetKeyName(4, "FolderError");
+			this.imageList.Images.SetKeyName(5, "File");
+			this.imageList.Images.SetKeyName(6, "FileTemp");
+			this.imageList.Images.SetKeyName(7, "FileGood");
+			this.imageList.Images.SetKeyName(8, "FileError");
+			// 
 			// splitSub
 			// 
 			this.splitSub.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -158,6 +172,21 @@
 			this.listFIles.UseCompatibleStateImageBehavior = false;
 			this.listFIles.View = System.Windows.Forms.View.Details;
 			// 
+			// colFileName
+			// 
+			this.colFileName.Text = "File";
+			this.colFileName.Width = 400;
+			// 
+			// colFileSize
+			// 
+			this.colFileSize.Text = "Size";
+			this.colFileSize.Width = 100;
+			// 
+			// colFileStatus
+			// 
+			this.colFileStatus.Text = "Status";
+			this.colFileStatus.Width = 100;
+			// 
 			// listLog
 			// 
 			this.listLog.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -182,13 +211,8 @@
             this.txtPath});
 			this.toolBar.Location = new System.Drawing.Point(3, 0);
 			this.toolBar.Name = "toolBar";
-			this.toolBar.Size = new System.Drawing.Size(1044, 39);
+			this.toolBar.Size = new System.Drawing.Size(1075, 39);
 			this.toolBar.TabIndex = 0;
-			// 
-			// txtPath
-			// 
-			this.txtPath.Name = "txtPath";
-			this.txtPath.Size = new System.Drawing.Size(500, 39);
 			// 
 			// cmdOpen
 			// 
@@ -198,6 +222,7 @@
 			this.cmdOpen.Size = new System.Drawing.Size(76, 36);
 			this.cmdOpen.Text = "Open";
 			this.cmdOpen.ToolTipText = "Open a directory";
+			this.cmdOpen.Click += new System.EventHandler(this.cmdOpen_Click);
 			// 
 			// cmdClose
 			// 
@@ -252,35 +277,12 @@
 			this.cmdReset.Size = new System.Drawing.Size(76, 36);
 			this.cmdReset.Text = "Reset";
 			this.cmdReset.ToolTipText = "Reset all tree view items";
+			this.cmdReset.Click += new System.EventHandler(this.cmdReset_Click);
 			// 
-			// imageList
+			// txtPath
 			// 
-			this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
-			this.imageList.TransparentColor = System.Drawing.Color.Transparent;
-			this.imageList.Images.SetKeyName(0, "Root");
-			this.imageList.Images.SetKeyName(1, "Folder");
-			this.imageList.Images.SetKeyName(2, "FolderTemp");
-			this.imageList.Images.SetKeyName(3, "FolderGood");
-			this.imageList.Images.SetKeyName(4, "FolderError");
-			this.imageList.Images.SetKeyName(5, "File");
-			this.imageList.Images.SetKeyName(6, "FileTemp");
-			this.imageList.Images.SetKeyName(7, "FileGood");
-			this.imageList.Images.SetKeyName(8, "FileError");
-			// 
-			// colFileName
-			// 
-			this.colFileName.Text = "File";
-			this.colFileName.Width = 400;
-			// 
-			// colFileSize
-			// 
-			this.colFileSize.Text = "Size";
-			this.colFileSize.Width = 100;
-			// 
-			// colFileStatus
-			// 
-			this.colFileStatus.Text = "Status";
-			this.colFileStatus.Width = 100;
+			this.txtPath.Name = "txtPath";
+			this.txtPath.Size = new System.Drawing.Size(500, 39);
 			// 
 			// FormMain
 			// 
