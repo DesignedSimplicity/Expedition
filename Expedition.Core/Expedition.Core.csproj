@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EPPlus, Version=4.1.1.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.4.1.1\lib\net40\EPPlus.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,11 +49,16 @@
     <Compile Include="Services\BaseMessages.cs" />
     <Compile Include="Services\CreateChecksums.cs" />
     <Compile Include="Services\CreateChecksumsMessages.cs" />
+    <Compile Include="Services\ExportSpreadsheetMessages.cs" />
+    <Compile Include="Services\ExportSpreadsheet.cs" />
     <Compile Include="Services\QueryFileSystem.cs" />
     <Compile Include="Services\QueryFileSystemMessages.cs" />
     <Compile Include="Services\QueryHashSystem.cs" />
     <Compile Include="Services\VerifyChecksums.cs" />
     <Compile Include="Services\VerifyChecksumsMessages.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

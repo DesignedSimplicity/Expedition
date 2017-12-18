@@ -55,7 +55,7 @@ namespace Expedition.Core.Services
 			var hasher = execute.Request.HashType.ToString();
 			using (var algorithm = HashCalc.GetHashAlgorithm(execute.Request.HashType))
 			{
-				output?.WriteLine($"# Generated {hasher} with Expedition at {DateTime.UtcNow}");
+				output?.WriteLine($"# Generated {hasher} with Expedition at {DateTime.Now}");
 				output?.WriteLine($"# https://github.com/DesignedSimplicity/Expedition/");
 				output?.WriteLine("");
 
@@ -66,8 +66,8 @@ namespace Expedition.Core.Services
 
 				// enumerate and hash files
 				int count = 0;
-				execute.Files = queryResult.Files;
-				foreach (var file in execute.Files)
+				var files = new List<FileInfo>();
+				foreach (var file in queryResult.Files)
 				{
 					var fileName = file.FullName;
 
@@ -77,7 +77,8 @@ namespace Expedition.Core.Services
 
 					try
 					{
-						count++;						
+						count++;
+						files.Add(file);
 						execute.Log($"{count}. {fileName} -> {hasher} = ");
 
 						// calculate hash and output hash to log
@@ -95,6 +96,9 @@ namespace Expedition.Core.Services
 						execute.LogError(fileName, ex);
 					}
 				}
+
+				// gather output files
+				execute.Files = files.ToArray();
 
 				// clean up output file
 				output?.Flush();

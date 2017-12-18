@@ -22,7 +22,7 @@ namespace Expedition.Core.Services
 		/// <summary>
 		/// Recurse directory
 		/// </summary>
-		public bool Recursive { get; set; }
+		public bool Recursive { get; set; } = false;
 
 		/// <summary>
 		/// File matching pattern
@@ -35,10 +35,10 @@ namespace Expedition.Core.Services
 		public string DirectoryUri { get; set; }
 	}
 
-	public class QueryFileSystemResponse
+	public class QueryFileSystemResponse : BaseResponse
 	{
 		public FileInfo[] Files { get; set; }
 
-		public Dictionary<string, Exception> Exceptions { get; private set; } = new Dictionary<string, Exception>();
+		public QueryFileSystemResponse(QueryFileSystemRequest request) : base(request) { }
 	}
 }

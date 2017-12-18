@@ -7,18 +7,36 @@ using System.Threading.Tasks;
 
 namespace Expedition.Core.Services
 {
+	public class BaseRequest
+	{
+		public DateTime Started { get; private set; } = DateTime.Now;
+	}
+
+	public class BaseExecute
+	{
+		
+	}
+
+	public class BaseResponse
+	{
+		public DateTime Started { get; private set; }
+		public DateTime Completed { get; private set; } = DateTime.Now;
+		public Dictionary<string, Exception> Errors { get; protected set; }
+		public bool HasErrors { get { return Errors.Count > 0; } }
+
+		public BaseResponse(BaseRequest request)
+		{
+			Started = request.Started;
+		}
+	}
+
 	public interface IChecksumsRequest
 	{
 		TextWriter LogStream { get; }
 		bool Preview { get; }
 	}
 
-	public class BaseRequest
-	{
-		public DateTime Started { get; protected set; } = DateTime.UtcNow;
-	}
-
-	public class ChecksumsExecute
+	public class ChecksumsExecute : BaseExecute
 	{
 		protected IChecksumsRequest _request;
 
@@ -33,18 +51,12 @@ namespace Expedition.Core.Services
 		public void LogError(string uri, Exception ex) { Exceptions.Add(uri, ex); LogLine($"ERROR: {uri} @ {ex.Message}"); }
 	}
 
-	public class ChecksumsResponse: BaseResponse
+	public class ChecksumsResponse : BaseResponse
 	{
 		public FileInfo[] Files { get; protected set; }
 
 		public bool HasFiles { get { return Files.Length > 0; } }
-	}
 
-	public class BaseResponse
-	{
-		public DateTime Started { get; protected set; }
-		public DateTime Completed { get; protected set; } = DateTime.UtcNow;
-		public Dictionary<string, Exception> Errors { get; protected set; }
-		public bool HasErrors { get { return Errors.Count > 0; } }
+		public ChecksumsResponse(BaseRequest request) : base(request) {}
 	}
 }

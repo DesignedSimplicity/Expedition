@@ -53,9 +53,13 @@
     <Compile Include="Parse\RootMatchTests.cs" />
     <Compile Include="Parse\RootParseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\QueryFileSystemTests.cs" />
     <Compile Include="Services\CreateChecksumsTests.cs" />
+    <Compile Include="TestsHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\Root 1\Folder A\File A.nfo" />
+    <None Include="Data\Root 2\Folder B\Subfolder B\File B.csv" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +67,10 @@
       <Project>{92f14769-ac56-4b1e-a830-0521cd61042c}</Project>
       <Name>Expedition.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\File 0.txt" />
+    <Content Include="Data\Root 1\File 1.txt" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

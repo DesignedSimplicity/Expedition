@@ -21,7 +21,7 @@ namespace Expedition.Core.Services
 			var searchOption = request.Recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
 
 			// execute file search
-			var response = new QueryFileSystemResponse();
+			var response = new QueryFileSystemResponse(request);
 			var dir = new DirectoryInfo(request.DirectoryUri);
 			if (request.Verbose)
 			{
@@ -36,7 +36,7 @@ namespace Expedition.Core.Services
 					catch (Exception ex)
 					{
 						// log exception and re-throw if not silent
-						response.Exceptions.Add(file.FullName, ex);
+						response.Errors.Add(file.FullName, ex);
 						if (!request.Silent) throw ex;
 					}
 				}
@@ -52,7 +52,7 @@ namespace Expedition.Core.Services
 				catch (Exception ex)
 				{
 					// log exception and re-throw if not silent
-					response.Exceptions.Add(dir.FullName, ex);
+					response.Errors.Add(dir.FullName, ex);
 					if (!request.Silent) throw ex;
 				}
 			}

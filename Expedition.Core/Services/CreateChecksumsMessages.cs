@@ -55,10 +55,8 @@ namespace Expedition.Core.Services
 	{
 		public string OutputFileUri { get; set; }
 
-		public CreateChecksumsResponse(CreateChecksumsExecute execute)
+		public CreateChecksumsResponse(CreateChecksumsExecute execute) : base(execute.Request)
 		{
-			Started = execute.Request.Started;
-
 			Errors = execute.Exceptions;
 			Files = execute.Files;
 
