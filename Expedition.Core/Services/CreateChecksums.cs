@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Expedition.Core.Parse;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,22 +36,44 @@ namespace Expedition.Core.Services
 				if (!ParsePath.IsSamePath(root, dir) && !ParsePath.IsAncestor(root, dir)) throw new Exception($"Input URI '{root}' is not ancestor of output URI '{dir}'");
 			}
 
-			// check output file
+			// prepare output files
 			var now = DateTime.Now;
 			var ext = execute.Request.HashType.ToString().ToLowerInvariant();
 			var path = String.IsNullOrWhiteSpace(root)
 				? dir
 				: root;
-			var file = Path.Combine(path, $"_{now:yyyyMMdd}-{now:HHmmss}.{ext}");
-			if (File.Exists(file)) throw new Exception($"Output file '{file}' already exists");
-			execute.OutputFileUri = file;
+			var name = $"_{now:yyyyMMdd}-{now:HHmmss}";
+
+			// check hash file
+			var hash = Path.Combine(path, $"{name}.{ext}");
+			if (File.Exists(hash)) throw new Exception($"Output hash file '{name}' already exists");
+			execute.OutputFileUri = hash;
+
+			// check excel file
+			if (execute.Request.Report)
+			{
+				var excel = Path.Combine(path, $"{name}.xlsx");
+				if (File.Exists(excel)) throw new Exception($"Output report file '{name}' already exists");
+				execute.ReportFileUri = excel;
+			}
 		}
 
 		private void Execute(CreateChecksumsExecute execute)
 		{
 			// set up hashing
 			StreamWriter output = null;
-			if (!execute.Request.Preview) output = File.CreateText(execute.OutputFileUri);
+			if (!execute.Request.Preview)
+			{
+				output = File.CreateText(execute.OutputFileUri);
+			}
+
+			// set up reporting
+			ParseExcel report = null;
+			if (execute.Request.Report)
+			{
+				report = new ParseExcel();
+				report.StartFileSheet();
+			}
 
 			var hasher = execute.Request.HashType.ToString();
 			using (var algorithm = HashCalc.GetHashAlgorithm(execute.Request.HashType))
@@ -69,41 +92,67 @@ namespace Expedition.Core.Services
 				var files = new List<FileInfo>();
 				foreach (var file in queryResult.Files)
 				{
+					string hash = null;
 					var fileName = file.FullName;
 
 					// exclude/skip output file
 					if (String.Compare(execute.OutputFileUri, fileName, true) == 0)
 						continue;
-
+					
 					try
 					{
+						
 						count++;
 						files.Add(file);
-						execute.Log($"{count}. {fileName} -> {hasher} = ");
+						var log = new StringBuilder();
+						log.Append($"{count}. {fileName} -> ");
 
-						// calculate hash and output hash to log
-						var hash = (execute.Request.Preview
-							? hasher
-							: HashCalc.GetHash(fileName, algorithm));
-						execute.LogLine(hash);
+						if (execute.Request.Preview)
+						{
+							log.Append($"Log");
+						}
+						else
+						{
+							// calculate hash and output hash to log
+							hash = HashCalc.GetHash(fileName, algorithm);
+							log.Append($"{hasher} = {hash}");
+						}
+
+						// write log message
+						execute.Log(log.ToString());
 
 						// format and write checksum to stream
 						var path = execute.GetOuputPath(fileName);
 						output?.WriteLine($"{hash} {path}");
+
+						// write report data if requested
+						report?.AddFileInfo(file, hash);
 					}
 					catch (Exception ex)
 					{
 						execute.LogError(fileName, ex);
+
+						// write report data if requested
+						report?.AddFileInfo(file, hash, ex.Message);
 					}
 				}
 
 				// gather output files
 				execute.Files = files.ToArray();
+				execute.Log($"TOTAL FILES: {execute.Files}");
+				execute.Log($"ERRORS: {execute.Exceptions.Count()}");
 
 				// clean up output file
 				output?.Flush();
 				output?.Close();
 				output?.Dispose();
+
+				// close out report
+				if (report != null)
+				{
+					execute.Log("SAVING REPORT");
+					report.SaveAs(execute.ReportFileUri);
+				}
 			}
 		}
 	}

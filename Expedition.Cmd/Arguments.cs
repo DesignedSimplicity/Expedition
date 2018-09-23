@@ -38,16 +38,27 @@ namespace Expedition.Cmd
 						case "-verbose":
 							IsVerboseReport = true;
 							break;
+						case "-i":
+						case "-ignore":
+							IsIgnoreDefaults = true;
+							break;
 						case "-a":
 						case "-absolute":
 							IsAbsolutePath = true;
 							break;
 						default:
 							if (Directory.Exists(arg))
+							{
 								DirectoryUri = arg;
-
-							if (a.EndsWith(".md5") || a.EndsWith(".sha1"))
+							}
+							else if (a.EndsWith(".md5") || a.EndsWith(".sha1"))
+							{
 								FileUri = arg.Trim();
+							}
+							else if (File.Exists(a + ".md5"))
+							{
+								FileUri = arg + ".md5";
+							}
 							break;
 					}
 				}
@@ -92,6 +103,7 @@ namespace Expedition.Cmd
 		public bool IsValid { get; private set; }
 
 		public bool IsPreview { get; private set; }
+		public bool IsIgnoreDefaults { get; private set; }
 		public bool IsVerboseReport { get; private set; }
 		public bool IsAbsolutePath { get; private set; }
 		public Core.HashType HashType { get; private set; }

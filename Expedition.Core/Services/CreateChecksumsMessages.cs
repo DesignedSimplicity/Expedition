@@ -28,6 +28,11 @@ namespace Expedition.Core.Services
 		/// Checks access without creating hashes
 		/// </summary>
 		public bool Preview { get; set; } = false;
+
+		/// <summary>
+		/// Creates output excel file report
+		/// </summary>
+		public bool Report { get; set; } = false;
 	}
 
 	public class CreateChecksumsExecute : ChecksumsExecute
@@ -35,6 +40,8 @@ namespace Expedition.Core.Services
 		public CreateChecksumsRequest Request { get; private set; }
 
 		public string OutputFileUri { get; set; }
+
+		public string ReportFileUri { get; set; }
 
 		private int _truncateLength = 0;
 

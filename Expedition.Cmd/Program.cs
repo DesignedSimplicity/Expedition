@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Expedition.Core.Services;
 using System.Reflection;
+using Expedition.Core.Parse;
 
 namespace Expedition.Cmd
 {
@@ -14,9 +15,12 @@ namespace Expedition.Cmd
 	{
 		static void Main(string[] args)
 		{
+			//"D:\Development\Sources\Expedition\Expedition.Cmd\bin\Debug\Scout.exe"
+
 			Console.WriteLine(Environment.CurrentDirectory);
 			//args = new string[] { @"E:\_NEW\_KENNY\_20171210-202950.md5" }; // @"C:\Apps\", "-md5", "-a" };
 			//args = new string[] { @"I:\Media\_20180608-070859.md5" };
+			//args = new string[] { @"C:\Code\GPX", "-v" };
 
 			// parse out command line options
 			var arguments = new Arguments();
@@ -30,12 +34,6 @@ namespace Expedition.Cmd
 				var response = arguments.FileExists
 					? Verify(arguments)
 					: Create(arguments);
-
-				// show verbose ouput if needed
-				if (arguments.IsVerboseReport)
-				{
-					Console.WriteLine($"TOTAL FILES: {response.Files?.Count()}");
-				}
 
 				// parse service response here
 				if (response.HasErrors)
@@ -89,6 +87,7 @@ namespace Expedition.Cmd
 				HashType = arguments.HashType,
 				DirectoryUri = directoryUri,
 				RelativeToUri = relativeToUri,
+				Report = arguments.IsVerboseReport,
 				Preview = arguments.IsPreview,
 				LogStream = Console.Out,
 				Recursive = true,
@@ -96,7 +95,9 @@ namespace Expedition.Cmd
 
 			// create and execute service request
 			var create = new CreateChecksums();
-			return create.Execute(request);
+			var response = create.Execute(request);
+
+			return response;
 		}
 	}
 }
