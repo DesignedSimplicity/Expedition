@@ -36,7 +36,7 @@ namespace Expedition.Cmd
 							break;
 						case "-v":
 						case "-verbose":
-							IsPreview = true;
+							IsVerboseReport = true;
 							break;
 						case "-a":
 						case "-absolute":
