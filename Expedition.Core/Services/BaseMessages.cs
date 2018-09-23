@@ -21,7 +21,7 @@ namespace Expedition.Core.Services
 	{
 		public DateTime Started { get; private set; }
 		public DateTime Completed { get; private set; } = DateTime.Now;
-		public Dictionary<string, Exception> Errors { get; protected set; }
+		public Dictionary<string, Exception> Errors { get; protected set; } = new Dictionary<string, Exception>();
 		public bool HasErrors { get { return Errors.Count > 0; } }
 
 		public BaseResponse(BaseRequest request)
@@ -47,7 +47,6 @@ namespace Expedition.Core.Services
 		public void Log(string text) { _request.LogStream?.Write(text); }
 
 		public void LogLine(string text) { _request.LogStream?.WriteLine(text); }
-
 		public void LogError(string uri, Exception ex) { Exceptions.Add(uri, ex); LogLine($"ERROR: {uri} @ {ex.Message}"); }
 	}
 

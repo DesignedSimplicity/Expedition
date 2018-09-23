@@ -85,6 +85,7 @@ namespace Expedition.Core.Services
 				// query file system
 				var query = new QueryFileSystem();
 				//TODO attach event handler here
+				execute.Request.Silent = true;
 				var queryResult = query.Execute(execute.Request);
 
 				// enumerate and hash files
@@ -119,7 +120,7 @@ namespace Expedition.Core.Services
 						}
 
 						// write log message
-						execute.Log(log.ToString());
+						execute.LogLine(log.ToString());
 
 						// format and write checksum to stream
 						var path = execute.GetOuputPath(fileName);
@@ -139,18 +140,23 @@ namespace Expedition.Core.Services
 
 				// gather output files
 				execute.Files = files.ToArray();
-				execute.Log($"TOTAL FILES: {execute.Files}");
-				execute.Log($"ERRORS: {execute.Exceptions.Count()}");
+				execute.LogLine($"TOTAL FILES: {files.Count}");
+				if (queryResult.Errors.Count > 0) execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
+				if (execute.Exceptions.Count > 0) execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
 
 				// clean up output file
-				output?.Flush();
-				output?.Close();
-				output?.Dispose();
+				if (output != null)
+				{
+					execute.LogLine($"SAVING HASHES: {execute.OutputFileUri}");
+					output?.Flush();
+					output?.Close();
+					output?.Dispose();
+				}
 
 				// close out report
 				if (report != null)
 				{
-					execute.Log("SAVING REPORT");
+					execute.LogLine($"SAVING REPORT: {execute.ReportFileUri}");
 					report.SaveAs(execute.ReportFileUri);
 				}
 			}

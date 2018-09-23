@@ -20,7 +20,7 @@ namespace Expedition.Cmd
 			Console.WriteLine(Environment.CurrentDirectory);
 			//args = new string[] { @"E:\_NEW\_KENNY\_20171210-202950.md5" }; // @"C:\Apps\", "-md5", "-a" };
 			//args = new string[] { @"I:\Media\_20180608-070859.md5" };
-			//args = new string[] { @"C:\Code\GPX", "-v" };
+			args = new string[] { @"R:\", "-v", "" };
 
 			// parse out command line options
 			var arguments = new Arguments();
