@@ -127,14 +127,14 @@ namespace Expedition.Core.Services
 						output?.WriteLine($"{hash} {path}");
 
 						// write report data if requested
-						report?.AddFileInfo(file, hash);
+						report?.AddFileInfo(file, null, hash);
 					}
 					catch (Exception ex)
 					{
 						execute.LogError(fileName, ex);
 
 						// write report data if requested
-						report?.AddFileInfo(file, hash, ex.Message);
+						report?.AddFileInfo(file, null, hash, ex.Message);
 					}
 				}
 

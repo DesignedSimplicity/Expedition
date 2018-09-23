@@ -24,6 +24,7 @@ namespace Expedition.Core.Parse
 		private int _row;
 		private int _col;
 
+		/*
 		public void Create(string uri, IEnumerable<FileInfo> files)
 		{
 			_excel = new ExcelPackage();
@@ -43,6 +44,7 @@ namespace Expedition.Core.Parse
 			_worksheet.Dispose();
 			_excel.Dispose();
 		}
+		*/
 
 		public void SaveAs(string uri)
 		{
@@ -100,7 +102,7 @@ namespace Expedition.Core.Parse
 		}
 
 
-		public void AddFileInfo(FileInfo file, string hash = null, string error = null)
+		public void AddFileInfo(FileInfo file, string status = null, string hash = null, string error = null)
 		{
 			if (!_head) StartFileSheet();
 
@@ -108,7 +110,7 @@ namespace Expedition.Core.Parse
 			var exid = _row - 1;
 
 			var col = 1;
-			var status = String.IsNullOrWhiteSpace(hash) ? "INFO" : "HASH";
+			if (String.IsNullOrWhiteSpace(status)) status = String.IsNullOrWhiteSpace(hash) ? "INFO" : "HASH";
 			if (!String.IsNullOrWhiteSpace(error)) status = "ERROR";
 			_worksheet.Cells[_row, col++].Value = exid;
 			_worksheet.Cells[_row, col++].Value = status;

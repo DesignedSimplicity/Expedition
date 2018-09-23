@@ -23,6 +23,11 @@ namespace Expedition.Core.Services
 		/// Checks access without creating hashes
 		/// </summary>
 		public bool Preview { get; set; } = false;
+
+		/// <summary>
+		/// Creates output excel file report
+		/// </summary>
+		public bool Report { get; set; } = false;
 	}
 
 	public class VerifyChecksumsExecute : ChecksumsExecute
@@ -32,6 +37,8 @@ namespace Expedition.Core.Services
 		public string[] FileContents { get; set; }
 
 		public string InputFileUri { get; set; }
+
+		public string ReportFileUri { get; set; }
 
 		public HashType HashType { get; set; } = HashType.Md5;
 

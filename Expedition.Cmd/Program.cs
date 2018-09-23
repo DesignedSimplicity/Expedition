@@ -20,7 +20,17 @@ namespace Expedition.Cmd
 			Console.WriteLine(Environment.CurrentDirectory);
 			//args = new string[] { @"E:\_NEW\_KENNY\_20171210-202950.md5" }; // @"C:\Apps\", "-md5", "-a" };
 			//args = new string[] { @"I:\Media\_20180608-070859.md5" };
-			args = new string[] { @"R:\", "-v", "" };
+			args = new string[] { @"R:\_20180924-012312.md5", "-r", "" };
+
+			/* TODO:
+			 * Combine Error/Exception in Execute/Response
+			 * Add -verify assumes verify on first md5 file found in current directory
+			 * Rename -verbose -> -report to enable creation of xlsx output files
+			 * Update verify chechsum to support -report mode
+			 * Add simple performance/benchmark summary
+			 * Add sheet for directory sizes/counts
+			 * Add sheet for exceptions/errors
+			 */
 
 			// parse out command line options
 			var arguments = new Arguments();
@@ -38,20 +48,16 @@ namespace Expedition.Cmd
 				// parse service response here
 				if (response.HasErrors)
 				{
-					// verbose or prompt to show errors here
-					if (arguments.IsVerboseReport || arguments.PromptOutput())
+					// show error details here
+					Console.WriteLine($"TOTAL ERRORS: {response.Errors.Count}");
+					foreach (var error in response.Errors)
 					{
-						// show error details here
-						Console.WriteLine($"TOTAL ERRORS: {response.Errors.Count}");
-						foreach (var error in response.Errors)
-						{
-							Console.WriteLine($"{error.Key} = {error.Value.Message}");
-						}
+						Console.WriteLine($"{error.Key} = {error.Value.Message}");
 					}
 				}
 
 #if DEBUG
-				Console.ReadKey();
+				//Console.ReadKey();
 #endif
 			}
 		}
@@ -62,6 +68,7 @@ namespace Expedition.Cmd
 			{
 				FileUri = arguments.FileUri,
 				LogStream = Console.Out,
+				Report = arguments.CreateReport,
 			};
 
 			var verify = new VerifyChecksums();
@@ -77,7 +84,7 @@ namespace Expedition.Cmd
 				: arguments.DirectoryUri;
 
 			// decide to make it relative
-			var relativeToUri = arguments.IsAbsolutePath
+			var relativeToUri = arguments.UseAbsolutePath
 				? string.Empty
 				: directoryUri;
 
@@ -87,8 +94,8 @@ namespace Expedition.Cmd
 				HashType = arguments.HashType,
 				DirectoryUri = directoryUri,
 				RelativeToUri = relativeToUri,
-				Report = arguments.IsVerboseReport,
-				Preview = arguments.IsPreview,
+				Report = arguments.CreateReport,
+				Preview = arguments.RunAsPreview,
 				LogStream = Console.Out,
 				Recursive = true,
 			};

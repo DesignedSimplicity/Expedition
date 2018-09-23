@@ -32,19 +32,15 @@ namespace Expedition.Cmd
 							break;
 						case "-p":
 						case "-preview":
-							IsPreview = true;
+							RunAsPreview = true;
 							break;
-						case "-v":
-						case "-verbose":
-							IsVerboseReport = true;
-							break;
-						case "-i":
-						case "-ignore":
-							IsIgnoreDefaults = true;
+						case "-r":
+						case "-report":
+							CreateReport = true;
 							break;
 						case "-a":
 						case "-absolute":
-							IsAbsolutePath = true;
+							UseAbsolutePath = true;
 							break;
 						default:
 							if (Directory.Exists(arg))
@@ -102,10 +98,9 @@ namespace Expedition.Cmd
 
 		public bool IsValid { get; private set; }
 
-		public bool IsPreview { get; private set; }
-		public bool IsIgnoreDefaults { get; private set; }
-		public bool IsVerboseReport { get; private set; }
-		public bool IsAbsolutePath { get; private set; }
+		public bool RunAsPreview { get; private set; }
+		public bool CreateReport { get; private set; }
+		public bool UseAbsolutePath { get; private set; }
 		public Core.HashType HashType { get; private set; }
 
 		public string FileUri { get; private set; }

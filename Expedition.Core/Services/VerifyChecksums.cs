@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Expedition.Core.Parse;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -87,10 +88,27 @@ namespace Expedition.Core.Services
 
 			// save input file uri
 			execute.InputFileUri = uri;
+
+			// check excel file
+			if (execute.Request.Report)
+			{
+				var now = DateTime.Now;
+				var excel = $"{uri}_{now:yyyyMMdd}-{now:HHmmss}.xlsx";
+				if (File.Exists(excel)) throw new Exception($"Output report file '{excel}' already exists");
+				execute.ReportFileUri = excel;
+			}
 		}
 
 		private void Execute(VerifyChecksumsExecute execute)
 		{
+			// set up reporting
+			ParseExcel report = null;
+			if (execute.Request.Report)
+			{
+				report = new ParseExcel();
+				report.StartFileSheet();
+			}
+
 			var hasher = execute.HashType.ToString();
 			using (var algorithm = HashCalc.GetHashAlgorithm(execute.HashType))
 			{
@@ -110,10 +128,12 @@ namespace Expedition.Core.Services
 					try
 					{
 						count++;
-						execute.Log($"{count}. {fileName} -> {hasher} = ");
+						var log = new StringBuilder();
+						log.Append($"{count}. {fileName} -> {hasher} = ");
 
 						// calculate hash and output hash to log
 						var hash = hasher;
+						string error = null;
 						var status = "PREVIEW";
 						if (!execute.Request.Preview)
 						{
@@ -122,11 +142,13 @@ namespace Expedition.Core.Services
 							status = match ? "VALID" : "ERROR";
 							if (!match)
 							{
-								execute.LogError(entry.Key, new Exception("Hash Invalid"));
+								error = "Hash Invalid";
+								execute.LogError(entry.Key, new Exception(error));
 							}
 						}
+						// write report data if requested
+						report?.AddFileInfo(file, status, hash, error);
 						execute.LogLine($"{hash} {status}");
-
 					}
 					catch (Exception ex)
 					{
@@ -136,6 +158,16 @@ namespace Expedition.Core.Services
 
 				// save file list
 				execute.Files = files.ToArray();
+				execute.LogLine($"TOTAL FILES: {files.Count}");
+				//if (queryResult.Errors.Count > 0) execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
+				if (execute.Exceptions.Count > 0) execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
+
+				// close out report
+				if (report != null)
+				{
+					execute.LogLine($"SAVING REPORT: {execute.ReportFileUri}");
+					report.SaveAs(execute.ReportFileUri);
+				}
 			}
 		}
 	}
