@@ -74,15 +74,33 @@ namespace Expedition.Cmd
 
 		public bool PromptInput()
 		{
-			// neither specified
+			// nothing specified
 			if (String.IsNullOrWhiteSpace(DirectoryUri) && String.IsNullOrWhiteSpace(FileUri))
 			{
-				Console.WriteLine("No file or directory specified.");
-				Console.Write("Would you like to auto-create a new hashfile in the current directory? (Y/n):");
+				Console.WriteLine("ERROR: No file or directory specified.");
+				Console.Write("Would you like to auto-create a new hash file in the current directory? (y/n):");
 				if (PromptYN())
 				{
 					DirectoryUri = Environment.CurrentDirectory;
 					IsValid = true;
+				}
+				else
+				{
+					Console.WriteLine("Please enter a path to a directory of hash file:");
+					while (!IsValid)
+					{
+						var path = Console.ReadLine();
+						if (File.Exists(path))
+						{
+							FileUri = path;
+							IsValid = true;
+						}
+						else if (Directory.Exists(path))
+						{
+							DirectoryUri = path;
+							IsValid = true;
+						}
+					}
 				}
 			}
 

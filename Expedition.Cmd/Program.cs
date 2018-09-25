@@ -16,17 +16,11 @@ namespace Expedition.Cmd
 		static void Main(string[] args)
 		{
 			//"D:\Development\Sources\Expedition\Expedition.Cmd\bin\Debug\Scout.exe"
-
-			Console.WriteLine(Environment.CurrentDirectory);
-			//args = new string[] { @"E:\_NEW\_KENNY\_20171210-202950.md5" }; // @"C:\Apps\", "-md5", "-a" };
-			//args = new string[] { @"I:\Media\_20180608-070859.md5" };
-			args = new string[] { @"R:\_20180924-012312.md5", "-r", "" };
+			//args = new string[] { @"R:\_20180924-012312.md5", "-r", "" };
 
 			/* TODO:
 			 * Combine Error/Exception in Execute/Response
 			 * Add -verify assumes verify on first md5 file found in current directory
-			 * Rename -verbose -> -report to enable creation of xlsx output files
-			 * Update verify chechsum to support -report mode
 			 * Add simple performance/benchmark summary
 			 * Add sheet for directory sizes/counts
 			 * Add sheet for exceptions/errors
@@ -40,6 +34,8 @@ namespace Expedition.Cmd
 			// execute valid response
 			if (arguments.IsValid)
 			{
+				Console.WriteLine($"STARTING SCOUT...");
+
 				// decide if we are creating or verifying
 				var response = arguments.FileExists
 					? Verify(arguments)
@@ -49,7 +45,7 @@ namespace Expedition.Cmd
 				if (response.HasErrors)
 				{
 					// show error details here
-					Console.WriteLine($"TOTAL ERRORS: {response.Errors.Count}");
+					Console.WriteLine($"ERRORS: {response.Errors.Count}");
 					foreach (var error in response.Errors)
 					{
 						Console.WriteLine($"{error.Key} = {error.Value.Message}");
@@ -64,6 +60,12 @@ namespace Expedition.Cmd
 
 		static ChecksumsResponse Verify(Arguments arguments)
 		{
+			Console.Write($"VERIFY: {arguments.FileUri}");
+			if (arguments.UseAbsolutePath) Console.Write(" -absolute");
+			if (arguments.RunAsPreview) Console.Write(" -preview");
+			if (arguments.CreateReport) Console.Write(" -report");
+			Console.WriteLine();
+
 			var request = new VerifyChecksumsRequest()
 			{
 				FileUri = arguments.FileUri,
@@ -77,6 +79,13 @@ namespace Expedition.Cmd
 
 		static ChecksumsResponse Create(Arguments arguments)
 		{
+			Console.Write($"CREATE: {arguments.DirectoryUri}");
+			if (arguments.UseAbsolutePath) Console.Write(" -absolute");
+			if (arguments.RunAsPreview) Console.Write(" -preview");
+			if (arguments.CreateReport) Console.Write(" -report");
+			if (arguments.HashType == Core.HashType.Sha1) Console.Write(" -sha1");
+			Console.WriteLine();
+
 			// get starting directory
 			var currentUri = arguments.CurrentDirectoryUri;
 			var directoryUri = arguments.IsCurrentDirectory
