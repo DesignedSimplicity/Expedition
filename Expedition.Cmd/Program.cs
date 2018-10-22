@@ -45,10 +45,23 @@ namespace Expedition.Cmd
 				if (response.HasErrors)
 				{
 					// show error details here
-					Console.WriteLine($"ERRORS: {response.Errors.Count}");
+					var errorCount = 1;
+					var errorLog = new StringBuilder();
+					Console.WriteLine($"ERRORS: {response.Errors.Count}");					
 					foreach (var error in response.Errors)
 					{
-						Console.WriteLine($"{error.Key} = {error.Value.Message}");
+						var errorText = $"ERROR #{errorCount.ToString("0000")}: {error.Key} = {error.Value.Message}";
+						errorLog.AppendLine(errorText);
+						Console.WriteLine(errorText);
+						errorCount++;
+					}
+
+					// prompt to create log file
+					if (!arguments.CreateReport && arguments.PromptOutput())
+					{
+						var now = DateTime.Now;
+						var logFile = $"Errors_{now:yyyyMMdd}-{now:HHmmss}.txt";
+						File.WriteAllText(logFile, errorLog.ToString());
 					}
 				}
 

@@ -148,7 +148,10 @@ namespace Expedition.Core.Services
 						}
 						// write report data if requested
 						report?.AddFileInfo(file, status, hash, error);
-						execute.LogLine($"{hash} {status}");
+
+						// display to output
+						log.Append($"{hash} {status}");
+						execute.LogLine(log.ToString());
 					}
 					catch (Exception ex)
 					{

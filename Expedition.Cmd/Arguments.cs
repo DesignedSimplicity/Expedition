@@ -65,6 +65,48 @@ namespace Expedition.Cmd
 			return IsValid;
 		}
 
+		public bool PromptInput()
+		{
+			// nothing specified
+			if (String.IsNullOrWhiteSpace(DirectoryUri) && String.IsNullOrWhiteSpace(FileUri))
+			{
+				Console.WriteLine("WARNING: No file or directory specified!");
+				if (PromptAutoCreate())
+				{
+					return IsValid;
+				}
+
+				if (PromptAutoVerify())
+				{
+					return IsValid;
+				}
+
+				Console.WriteLine("Please enter a path to a directory to hash or a file to verify.");
+				while (!IsValid)
+				{
+					Console.Write("Path: ");
+					var path = Console.ReadLine();
+					path = path.Trim(new char[] { '"' });
+					if (File.Exists(path))
+					{
+						FileUri = path;
+						IsValid = true;
+					}
+					else if (Directory.Exists(path))
+					{
+						DirectoryUri = path;
+						IsValid = true;
+					}
+					else
+					{
+						Console.WriteLine("WARNING: Path is invalid!");
+					}
+				}
+			}
+
+			return IsValid;
+		}
+
 		private bool PromptYN()
 		{
 			var key = Console.ReadKey();
@@ -72,35 +114,31 @@ namespace Expedition.Cmd
 			return (Char.ToUpperInvariant(key.KeyChar) == 'Y');
 		}
 
-		public bool PromptInput()
+		private bool PromptAutoCreate()
 		{
-			// nothing specified
-			if (String.IsNullOrWhiteSpace(DirectoryUri) && String.IsNullOrWhiteSpace(FileUri))
+			// auto-create a new MD5 file in current directory
+			Console.Write($"Would you like to auto-create a new hash file in the current directory? (y/n):");
+			if (PromptYN())
 			{
-				Console.WriteLine("ERROR: No file or directory specified.");
-				Console.Write("Would you like to auto-create a new hash file in the current directory? (y/n):");
+				DirectoryUri = Environment.CurrentDirectory;
+				IsValid = true;
+			}
+
+			return IsValid;
+		}
+
+		private bool PromptAutoVerify()
+		{
+			var dir = new DirectoryInfo(Environment.CurrentDirectory);
+			var verify = dir.GetFiles().Where(x => String.Compare(x.Extension, ".md5", true) == 0)
+									.FirstOrDefault();
+			if (verify != null)
+			{
+				Console.Write($"Would you like to verify this hash file: {verify.Name}? (y/n):");
 				if (PromptYN())
 				{
-					DirectoryUri = Environment.CurrentDirectory;
+					FileUri = verify.FullName;
 					IsValid = true;
-				}
-				else
-				{
-					Console.WriteLine("Please enter a path to a directory of hash file:");
-					while (!IsValid)
-					{
-						var path = Console.ReadLine();
-						if (File.Exists(path))
-						{
-							FileUri = path;
-							IsValid = true;
-						}
-						else if (Directory.Exists(path))
-						{
-							DirectoryUri = path;
-							IsValid = true;
-						}
-					}
 				}
 			}
 
@@ -109,8 +147,8 @@ namespace Expedition.Cmd
 
 		public bool PromptOutput()
 		{
-			Console.WriteLine("Verbose was not specified and there were errors.");
-			Console.Write("Would you like to see a report of the errors? (Y/n):");
+			Console.WriteLine("WARNING: Verbose was not specified and there were errors.");
+			Console.Write("Would you like to create a log file with the errors? (y/n):");
 			return PromptYN();
 		}
 
