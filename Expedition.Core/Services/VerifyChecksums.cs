@@ -125,6 +125,8 @@ namespace Expedition.Core.Services
 					var file = new FileInfo(fileName);
 					files.Add(file);
 
+					var status = "PREVIEW";
+
 					try
 					{
 						count++;
@@ -134,18 +136,40 @@ namespace Expedition.Core.Services
 						// calculate hash and output hash to log
 						var hash = hasher;
 						string error = null;
-						var status = "PREVIEW";
 						if (!execute.Request.Preview)
 						{
-							hash = HashCalc.GetHash(fileName, algorithm);
-							var match = (String.Compare(hash, entry.Value, true) == 0);
-							status = match ? "VALID" : "ERROR";
-							if (!match)
+							try
 							{
-								error = "Hash Invalid";
-								execute.LogError(entry.Key, new Exception(error));
+								hash = HashCalc.GetHash(fileName, algorithm);
+								var match = (String.Compare(hash, entry.Value, true) == 0);
+								if (match)
+								{
+									status = "VALID";
+								}
+								else
+								{
+									error = "Hash Invalid";
+									status = "INVALID";
+									execute.LogError(entry.Key, new Exception(error));
+								}
+							}
+							catch (DirectoryNotFoundException)
+							{
+								status = "MISSING";
+								error = "Not Found";
+							}
+							catch (FileNotFoundException)
+							{
+								status = "MISSING";
+								error = "Not Found";
+							}
+							catch (Exception ex)
+							{
+								status = "ERROR";
+								error = ex.Message;
 							}
 						}
+
 						// write report data if requested
 						report?.AddFileInfo(file, status, hash, error);
 
@@ -155,7 +179,7 @@ namespace Expedition.Core.Services
 					}
 					catch (Exception ex)
 					{
-						execute.LogError(entry.Key, ex);
+						execute.LogError(entry.Key, ex);						
 					}
 				}
 

@@ -16,7 +16,7 @@ namespace Expedition.Cmd
 		static void Main(string[] args)
 		{
 			//"D:\Development\Sources\Expedition\Expedition.Cmd\bin\Debug\Scout.exe"
-			//args = new string[] { @"R:\_20180924-012312.md5", "-r", "" };
+			args = new string[] { @"D:\_TEMP\_20181022-172051.md5", "-r", "" };
 
 			/* TODO:
 			 * Combine Error/Exception in Execute/Response

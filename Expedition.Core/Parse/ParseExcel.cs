@@ -24,28 +24,6 @@ namespace Expedition.Core.Parse
 		private int _row;
 		private int _col;
 
-		/*
-		public void Create(string uri, IEnumerable<FileInfo> files)
-		{
-			_excel = new ExcelPackage();
-			_worksheet = null;
-			_row = 1;
-			_col = 1;
-
-			StartFileSheet();
-			foreach (var file in files)
-			{
-				AddFileInfo(file);
-			}
-			FinishFileSheet();
-
-			var excel = new FileInfo(uri);
-			_excel.SaveAs(excel);
-			_worksheet.Dispose();
-			_excel.Dispose();
-		}
-		*/
-
 		public void SaveAs(string uri)
 		{
 			var excel = new FileInfo(uri);
@@ -91,6 +69,7 @@ namespace Expedition.Core.Parse
 
 			_worksheet.Cells[_row, _col++].Value = "ExId";
 			_worksheet.Cells[_row, _col++].Value = "Status";
+			_worksheet.Cells[_row, _col++].Value = "Exception";
 			_worksheet.Cells[_row, _col++].Value = "Uri";
 			_worksheet.Cells[_row, _col++].Value = "Directory";
 			_worksheet.Cells[_row, _col++].Value = "File";
@@ -111,9 +90,11 @@ namespace Expedition.Core.Parse
 
 			var col = 1;
 			if (String.IsNullOrWhiteSpace(status)) status = String.IsNullOrWhiteSpace(hash) ? "INFO" : "HASH";
-			if (!String.IsNullOrWhiteSpace(error)) status = "ERROR";
+			if (String.IsNullOrWhiteSpace(hash)) hash = "";
+			if (String.IsNullOrWhiteSpace(error)) error = "";
 			_worksheet.Cells[_row, col++].Value = exid;
 			_worksheet.Cells[_row, col++].Value = status;
+			_worksheet.Cells[_row, col++].Value = error;
 			_worksheet.Cells[_row, col++].Value = file.FullName;
 			_worksheet.Cells[_row, col++].Value = file.Directory.Name;
 			_worksheet.Cells[_row, col++].Value = file.Name;
@@ -129,7 +110,7 @@ namespace Expedition.Core.Parse
 			_foot = true;
 
 			// do auto formatting
-			AutoFormatColumns(_col - 2, _numberFormat);
+			AutoFormatColumns(_col - 3, _numberFormat);
 
 			// do manual formatting
 			//_worksheet.Column(_col).Style.Numberformat.Format = _percentFormat;
@@ -138,7 +119,7 @@ namespace Expedition.Core.Parse
 			_worksheet.Column(_col - 1).Style.Numberformat.Format = _dateFormat;
 
 			// auto size columns
-			AutoFitColumns(_col);
+			//AutoFitColumns(_col - 1);
 		}
 	}
 }
