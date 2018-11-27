@@ -53,7 +53,7 @@ namespace Expedition.Core.Services
 					{
 						// replace tabs if exists
 						int len = 0;
-						var fix = line.Replace(@"\t", " ");
+						var fix = line.Replace('\t', ' ');
 
 						// check first 40 characters is hex + 41 is space
 						if (len == 0 && fix.Length > 40)

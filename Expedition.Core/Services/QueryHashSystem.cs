@@ -41,7 +41,7 @@ namespace Expedition.Core.Services
 					response.Comments.Add(line);
 				else // this should parse
 				{
-					var fix = line.Replace(@"\t", " ").Trim();
+					var fix = line.Replace('\t', ' ').Trim();
 					var index = fix.IndexOf(" ");
 					if (index > 0)
 					{

@@ -36,3 +36,22 @@ Switches
 -abolute						Creates absolute file paths in hash file (-a)
 -preview						Executes the request without generating hashes (-p)
 -verbose						Ouputs detailed summary after hash creation or verification (-v)
+
+
+
+Scout.exe
+
+Scout /new					Creates a recursive xpdb file for everything in current directory
+Scout /md5					Creates a recursive md5 hash file for everything in current directory
+Scout /sha1					Creates a recursive sha1 hash file for everything in current directory
+Scout /tree					Creates a recursive xpdb file for everything in current directory but does not generate hashes (only stores file system info)
+
+
+
+Scout /v					Auto verifies most recently created md5, sha1 or xpdb and displays summary in console
+
+Scout input.xpdb			Verifies contents of input.xpdb and displays summary in console
+Scout input.md5 /r			Verifies contents of input.md5 and creates detailed xpdb report output
+
+Scout /e					Write detailed error log
+
