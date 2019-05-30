@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace Expedition.Core.Services
 {
+    public enum PowerSize { KB = 1024, MB = 1048576, GB = 1073741824 }
+
 	public class BaseRequest
 	{
 		public DateTime Started { get; private set; } = DateTime.Now;

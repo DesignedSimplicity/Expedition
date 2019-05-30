@@ -75,6 +75,7 @@ namespace Expedition.Core.Services
 				report.StartFileSheet();
 			}
 
+            long totalDataProcessed = 0;
 			var hasher = execute.Request.HashType.ToString();
 			using (var algorithm = HashCalc.GetHashAlgorithm(execute.Request.HashType))
 			{
@@ -105,22 +106,18 @@ namespace Expedition.Core.Services
 						
 						count++;
 						files.Add(file);
-						var log = new StringBuilder();
-						log.Append($"{count}. {fileName} -> ");
-
-						if (execute.Request.Preview)
+                        totalDataProcessed += file.Length;
+                        execute.Log($"{count}. {fileName} -> {file.Length.ToString("###,###,###,###,###")} == "); // TODO: add MB/GB file size
+                        if (execute.Request.Preview)
 						{
-							log.Append($"Log");
+                            execute.LogLine($"Log");
 						}
 						else
 						{
 							// calculate hash and output hash to log
 							hash = HashCalc.GetHash(fileName, algorithm);
-							log.Append($"{hasher} = {hash}");
+                            execute.LogLine($"{hasher} = {hash}");
 						}
-
-						// write log message
-						execute.LogLine(log.ToString());
 
 						// format and write checksum to stream
 						var path = execute.GetOuputPath(fileName);
@@ -138,10 +135,16 @@ namespace Expedition.Core.Services
 					}
 				}
 
-				// gather output files
-				execute.Files = files.ToArray();
-				execute.LogLine($"TOTAL FILES: {files.Count}");
-				if (queryResult.Errors.Count > 0) execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
+                // gather output files
+                execute.Files = files.ToArray();
+
+                // show output
+                var time = DateTime.Now.Subtract(execute.Request.Started);
+                var rate = totalDataProcessed / 1024.0 / 1024.0 / 1024.0 / time.TotalHours;                
+                execute.LogLine($"TOTAL: {files.Count.ToString("###,###,###,###,###,##0")} BYTES: {totalDataProcessed.ToString("###,###,###,###,###,##0")} SECONDS: {time.TotalSeconds.ToString("###,###,###,###,##0")}");                
+                execute.LogLine($"RATE: {rate.ToString("0.0")} GB/HOUR");
+
+                if (queryResult.Errors.Count > 0) execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
 				if (execute.Exceptions.Count > 0) execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
 
 				// clean up output file
