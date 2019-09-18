@@ -1,0 +1,74 @@
+﻿NEXT
+ Logging and exception handeling
+ Fix background threading for UI
+ Import/export md5 and create report
+
+ Auto complete text box for directory paths
+ Check current files exists, size and date
+ Check live file system for added, changed, removed
+
+ Support multiple root tree nodes
+ Robust error and exception handeling
+ Real time event based UI updates from background threads
+
+
+
+
+
+
+
+
+Scout - read only replacement for md5summer and TreeSize applications used to verify and document integrity of simple (offline) file repositories
+
+Alpha	Single threaded, load all directories and files, read file attributes, calculate folder stats, export to txt/csv file
+Beta	Multi threaded, import txt/csv/md5 file, check file status, create/verify hash, display file system integrity, export md5 file
+RC		Load/save sql db file, enhance folder tree and list with recursive/grouping/multi-select/filter features
+Done	Batch editing of notes, keywords and categories, global search features, ability to remove file data
+
+
+
+
+
+Recursively read file system into memory
+	Path, Name, Size, Created, Modified, Flags
+	Robust search options to filter by properties
+
+Provide thread safe tree and list view UI to view data
+	Optionally remove unwanted file system objects
+	Optionally operate on underlying file system
+
+Persist file system details in HTML, CSV, MD5, XLS files
+	Optionally import into live SQL database
+	Optionally generate MD5 hashes
+
+
+Start
+	Pick starting folder and create root FileSystem record
+	Recursively load all sub folders and build tree view when complete
+		Ignore security warnings, Exclude system/hidden files
+	
+	Start background thread to recursively read file properties and update folder stats
+	List file with details and display folder stats when folder is selected
+		Child Folders	###		Files		### (#GB)	Image	### (#GB)	Video	### (#GB) Audio ### (#GB) Data ### (#GB) Other ### (#GB)
+		All Sub Folders	###		All Files	### (#GB)	Image	### (#GB)	Video	### (#GB) Audio ### (#GB) Data ### (#GB) Other ### (#GB)
+		=================================================================
+		Icon	Type	Size	Name		Dates		Flags		Notes
+
+	Enable additional toolbar options once recursive background thread is complete
+		Refresh Selected Folder, Refresh Selected Directory
+		Import/export txt, csv, md5, xml, html file
+		Create/verify md5 hashes *
+
+		Global filters: Types, Size Rage, Date Range - list view to display only matching file(s) *
+		Quick search - highlights, expands and multiselects tree view to path(s) of matching file(s) *
+
+		Tree Options
+			Recursive	shows normalized list of all folders and files in selected folder
+			Checkboxes	shows optionally recursive selection of multiple root folders *
+		
+		List Groups
+			Normal	display normal explorer interface
+			Type	display all files grouped by type
+			Folder	display files in grouped subfolders
+			Dates	this week, this month, this year, last year, later *
+			Size	display all files grouped by 1/10/100 KB/MB/GB *
