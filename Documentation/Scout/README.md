@@ -1,6 +1,8 @@
-# Scout
+# Scout `.NET Framework, C#, Console`
 
 ## Create/verify md5 and sh1 file content hashes from the command line
+
+[Browse Source Code](/DesignedSimplicity/Expedition/tree/master/Expedition.Cmd)
 
 ### Usage
 
