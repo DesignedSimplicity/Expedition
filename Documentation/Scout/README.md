@@ -2,8 +2,6 @@
 
 ## Create/verify md5 and sh1 file content hashes from the command line
 
-
-
 ### Usage
 
 Execute `Scout.exe` from the command line and follow prompts
@@ -26,8 +24,8 @@ Scout.exe		Prompts to verify any/all md5|sha1 files in current directory then pr
 Scout.exe .		Auto-creates a new md5 file of the current directory
 Scout.exe C:\Folder\	Creates a new md5 file of the specified directory relative to the current directory
 
-Scout.exe /md5	Creates a recursive md5 hash file for everything in current directory
-Scout.exe /sha1	Creates a recursive sha1 hash file for everything in current directory
+Scout.exe /md5		Creates a recursive md5 hash file for everything in current directory
+Scout.exe /sha1		Creates a recursive sha1 hash file for everything in current directory
 
 Scout.exe File.md5	Verifies an existing md5 file against relative to current directory, prompt to create if does not exist
 Scout.exe File.sha1	Verifies an existing sha1 file against relative to current directory, prompt to create if does not exist
@@ -42,5 +40,5 @@ Scout.exe File.sha1	Verifies an existing sha1 file against relative to current d
 ##### Verify MD5 Output
 ![Verify MD5](./3-Verify.png)
 
-##### Sample Excel Report
+##### Sample Excel Report [(Download)](./Report-Example.xlsx)
 ![Excel Report](./4-Report.png)
