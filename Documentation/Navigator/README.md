@@ -4,8 +4,6 @@
 
 Lookout is a simple Windows Forms application to visualize a file system tree while providing functionality to recursively flatten and regroup the files contained in a directory and its subdirectories.
 
-[Browse Source Code](../../Expedition.Win.NavTree)
-
 ### Features
 
 * Recursively load a directory to summarize all file contents
@@ -15,5 +13,7 @@ Lookout is a simple Windows Forms application to visualize a file system tree wh
 * Group file list by media type or subdirectory
 * Export file system data to text or CSV
 * Generate md5 hash file for contents
+
+[Browse Source Code](../../Expedition.Win.NavTree)
 
 ![Navigator](./Main.png)
