@@ -1,57 +1,29 @@
-# Expedition
-A simple set of applications to take a snapshot of a file system and create or verify md5/sh1 file hashes
+# Expedition `.NET Framework, C#, Console, WinForm`
 
+## A simple set of applications to take a snapshot of a file system
 
-Scout
-=====
-Create and verify md5 and sh1 file content hashes from the command line
+Keeping track of multiple backup copies of file system directories can be difficult.  These simple utilities streamline that process for my personal workflow.
 
-Lookout
-=======
-Manage creation and verification output with simple Windows user interface
+![Expedition](./Documentation/Lookout/Main.png)
 
-Navigator
-=========
-Load and save snapshots of file metadata (size/date/etc) for offline backups
+### [Scout](./Documentation/Scout/README.md)
 
-Commander
-=========
-Compare file system snapshots against each other or to current live file data
+#### Create and/or verify md5 and sh1 file content hashes from the command line.
 
+The primary goal was to be able to create and/or verify file hashes to ensure the integrity of file copy/move operations.  Scout recursively creates a list of md5 or sha1 hashes for all files in a directory.
 
+The secondary goal was to create an easily consumable report of the hashing or verification process.  Scout can create an Excel document which details the file properties and status for troubleshooting or future reference.
 
-Useage
-~~~~~~
-Scout.exe						Prompts to verify any/all md5|sha1 files in current directory then prompts to create a new md5 file of current directory
+### [Lookout](./Documentation/Lookout/README.md)
 
-Scout.exe .						Auto-creates a new md5 file of the current directory
-Scout.exe C:\Folder\			Creates a new md5 file of the specified directory relative to the current directory
+#### Manage creation and verification output with simple Windows user interface.
 
-Scout.exe File.md5				Verifies an existing md5 file against relative to current directory, prompt to create if does not exist
-Scout.exe File.sha1				Verifies an existing sha1 file against relative to current directory, prompt to create if does not exist
+Additional goals will be accomplished with new utilities built on an as needed basis.  Lookout is a simple Windows Forms application to visualize a file system tree while providing functionality to recursively flatten and regroup the files contained in a directory and its subdirectories. This is used to strategize backup procedures and refactor file system structures.
 
-Switches
---------
--sha1							Uses the sha1 hash and file output type (-1)
--abolute						Creates absolute file paths in hash file (-a)
--preview						Executes the request without generating hashes (-p)
--verbose						Ouputs detailed summary after hash creation or verification (-v)
+#### Work in progress
 
+##### Navigator
+Load and save snapshots of file metadata (size/date/etc) for offline backups.
 
-
-Scout.exe
-
-Scout /new					Creates a recursive xpdb file for everything in current directory
-Scout /md5					Creates a recursive md5 hash file for everything in current directory
-Scout /sha1					Creates a recursive sha1 hash file for everything in current directory
-Scout /tree					Creates a recursive xpdb file for everything in current directory but does not generate hashes (only stores file system info)
-
-
-
-Scout /v					Auto verifies most recently created md5, sha1 or xpdb and displays summary in console
-
-Scout input.xpdb			Verifies contents of input.xpdb and displays summary in console
-Scout input.md5 /r			Verifies contents of input.md5 and creates detailed xpdb report output
-
-Scout /e					Write detailed error log
-
+##### Commander
+Compare file system snapshots against each other or to current live file data.
