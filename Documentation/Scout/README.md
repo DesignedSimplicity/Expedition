@@ -40,5 +40,5 @@ Scout.exe File.sha1	Verifies an existing sha1 file against relative to current d
 ##### Verify MD5 Output
 ![Verify MD5](./3-Verify.png)
 
-##### Sample Excel Report [(Download)](./Report-Example.xlsx)
+##### Sample Excel Report [(Download)](./Report-Example.xlsx?raw=true)
 ![Excel Report](./4-Report.png)
