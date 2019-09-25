@@ -54,7 +54,7 @@ namespace Expedition.Win.UtiliTree
 				@"%SystemRoot%\system32\networkexplorer.dll",
 				@"%SystemRoot%\system32\wmploc.dll",
 				@"%SystemRoot%\system32\ieframe.dll",
-				@"%SystemRoot%\system32\gameux.dll",
+				//@"%SystemRoot%\system32\gameux.dll",
 			};
 
 			foreach (var uri in dlls)
