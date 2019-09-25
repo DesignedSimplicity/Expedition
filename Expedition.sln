@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29230.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expedition.Core", "Expedition.Core\Expedition.Core.csproj", "{92F14769-AC56-4B1E-A830-0521CD61042C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expedition.Wpf", "Expedition.Wpf\Expedition.Wpf.csproj", "{9CA43910-87E0-4915-8C50-F35CCDE9EC9B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expedition.Test", "Expedition.Test\Expedition.Test.csproj", "{ECBCA859-6E1B-43EB-8027-467F8E392EE6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expedition.Cmd", "Expedition.Cmd\Expedition.Cmd.csproj", "{DE207CB5-BF0B-47FD-A5E5-B23DBC16DCAE}"
@@ -32,10 +30,6 @@ Global
 		{92F14769-AC56-4B1E-A830-0521CD61042C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92F14769-AC56-4B1E-A830-0521CD61042C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92F14769-AC56-4B1E-A830-0521CD61042C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CA43910-87E0-4915-8C50-F35CCDE9EC9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9CA43910-87E0-4915-8C50-F35CCDE9EC9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9CA43910-87E0-4915-8C50-F35CCDE9EC9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9CA43910-87E0-4915-8C50-F35CCDE9EC9B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ECBCA859-6E1B-43EB-8027-467F8E392EE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ECBCA859-6E1B-43EB-8027-467F8E392EE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECBCA859-6E1B-43EB-8027-467F8E392EE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
