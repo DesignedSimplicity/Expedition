@@ -1,6 +1,7 @@
 ﻿using Expedition.Core.Parse;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -106,22 +107,28 @@ namespace Expedition.Core.Services
 						
 						count++;
 						files.Add(file);
-                        totalDataProcessed += file.Length;
-                        execute.Log($"{count}. {fileName} -> {file.Length.ToString("###,###,###,###,###")} == "); // TODO: add MB/GB file size
+						execute.SetState(new BaseFileSytemState(file));
+						execute.Log($"{count}. {fileName} -> {file.Length:###,###,###,###,##0}");
                         if (execute.Request.Preview)
 						{
-                            execute.LogLine($"Log");
+                            execute.LogLine($" LOG");
 						}
 						else
 						{
 							// calculate hash and output hash to log
+							var s = new Stopwatch();
 							hash = HashCalc.GetHash(fileName, algorithm);
-                            execute.LogLine($"{hasher} = {hash}");
+							s.Stop();
+							execute.LogLine($" {hasher} = {hash} @ {file.Length / s.ElapsedMilliseconds} b/ms");
 						}
 
 						// format and write checksum to stream
 						var path = execute.GetOuputPath(fileName);
 						output?.WriteLine($"{hash} {path}");
+
+						// update file data state
+						totalDataProcessed += file.Length;
+						execute.SetState(new BaseFileSytemState(file, hash));
 
 						// write report data if requested
 						report?.AddFileInfo(file, null, hash);
@@ -129,8 +136,7 @@ namespace Expedition.Core.Services
 					catch (Exception ex)
 					{
 						execute.LogError(fileName, ex);
-
-						// write report data if requested
+						execute.SetState(new BaseFileSytemState(file, ex));
 						report?.AddFileInfo(file, null, hash, ex.Message);
 					}
 				}
@@ -140,16 +146,33 @@ namespace Expedition.Core.Services
 
                 // show output
                 var time = DateTime.Now.Subtract(execute.Request.Started);
-                var rate = totalDataProcessed / 1024.0 / 1024.0 / 1024.0 / time.TotalHours;                
-                execute.LogLine($"TOTAL: {files.Count.ToString("###,###,###,###,###,##0")} BYTES: {totalDataProcessed.ToString("###,###,###,###,###,##0")} SECONDS: {time.TotalSeconds.ToString("###,###,###,###,##0")}");                
-                execute.LogLine($"RATE: {rate.ToString("0.0")} GB/HOUR");
+				var mb = totalDataProcessed / 1024.0 / 1024.0;
+				var gb = mb / 1024;
+				var tb = gb / 1024;
+				var gbh = gb / time.TotalHours;
+				var mbs = mb / time.TotalMinutes;
+				execute.LogLine($"==================================================");
+				execute.LogLine($"FILES: {files.Count:###,###,###,###,###,##0}");
+				execute.LogLine($"BYTES: {totalDataProcessed:###,###,###,###,###,##0} = {gb:###,###,###,###,###,##0} GB = {tb:###,###,###,###,###,##0} TB");
+				execute.LogLine($"TIME: {time:hh\\:mm\\:ss} H:M:S = {time.TotalSeconds:###,###,###,###,##0} SEC");
+				execute.LogLine($"--------------------------------------------------");
+				execute.LogLine($"RATE: {gbh:##,##0.0} GB/HOUR = {mbs:##,##0.0} MB/SEC");
 
-                if (queryResult.Errors.Count > 0) execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
-				if (execute.Exceptions.Count > 0) execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
+				if (queryResult.Errors.Count > 0)
+				{
+					execute.LogLine($"##################################################");
+					execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
+				}
+				if (execute.Exceptions.Count > 0)
+				{
+					execute.LogLine($"##################################################");
+					execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
+				}
 
 				// clean up output file
 				if (output != null)
 				{
+					execute.LogLine($"==================================================");
 					execute.LogLine($"SAVING HASHES: {execute.OutputFileUri}");
 					output?.Flush();
 					output?.Close();
@@ -159,6 +182,7 @@ namespace Expedition.Core.Services
 				// close out report
 				if (report != null)
 				{
+					execute.LogLine($"--------------------------------------------------");
 					execute.LogLine($"SAVING REPORT: {execute.ReportFileUri}");
 					report.SaveAs(execute.ReportFileUri);
 				}

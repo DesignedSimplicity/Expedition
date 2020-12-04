@@ -37,7 +37,7 @@ namespace Expedition.Core.Services
 
 	public class CreateChecksumsExecute : ChecksumsExecute
 	{
-		public CreateChecksumsRequest Request { get; private set; }
+		public new CreateChecksumsRequest Request => (CreateChecksumsRequest)base.Request;
 
 		public string OutputFileUri { get; set; }
 
@@ -45,11 +45,8 @@ namespace Expedition.Core.Services
 
 		private int _truncateLength = 0;
 
-		public CreateChecksumsExecute(CreateChecksumsRequest request)
+		public CreateChecksumsExecute(CreateChecksumsRequest request) : base(request)
 		{
-			// prepare response
-			_request = Request = request;
-
 			// set up truncation
 			if (!String.IsNullOrWhiteSpace(Request.RelativeToUri))
 				_truncateLength = ParsePath.FixUri(Request.RelativeToUri, true).Length;

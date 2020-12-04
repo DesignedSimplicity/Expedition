@@ -30,11 +30,11 @@ namespace Expedition.Core
 
 		public static string GetMD5(string uri)
 		{
-			using (var md5 = new MD5CryptoServiceProvider())
+			using (var md5 = new MD5CryptoServiceProvider()) 
 				return GetHash(uri, md5);
 		}
 
-        public static bool CheckMD5(string uri, string hash)
+		public static bool CheckMD5(string uri, string hash)
         {
             try
             {
@@ -67,7 +67,7 @@ namespace Expedition.Core
 			if (hasher == HashType.Md5)
 				return new MD5CryptoServiceProvider();
 			else
-				return  new SHA1CryptoServiceProvider();
+				return new SHA1CryptoServiceProvider();
 		}
 	}
 }

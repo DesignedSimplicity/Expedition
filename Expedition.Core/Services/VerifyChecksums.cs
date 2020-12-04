@@ -99,6 +99,8 @@ namespace Expedition.Core.Services
 			}
 		}
 
+		
+
 		private void Execute(VerifyChecksumsExecute execute)
 		{
 			// set up reporting
@@ -117,7 +119,8 @@ namespace Expedition.Core.Services
 				var queryResult = query.Execute(execute.InputFileUri);
 
 				// enumerate and hash files
-				int count = 0;
+				int fileCount = 0;
+				long totalDataProcessed = 0;
 				var files = new List<FileInfo>();
 				foreach (var entry in queryResult.Entries)
 				{
@@ -126,12 +129,14 @@ namespace Expedition.Core.Services
 					files.Add(file);
 
 					var status = "PREVIEW";
+					//execute.AddState(execute.Request, )
+					//UpdateState(execute.Request, )
 
 					try
 					{
-						count++;
+						fileCount++;
 						var log = new StringBuilder();
-						log.Append($"{count}. {fileName} -> {hasher} = ");
+						log.Append($"{fileCount}. {fileName} -> {hasher} = ");
 
 						// calculate hash and output hash to log
 						var hash = hasher;
@@ -176,6 +181,9 @@ namespace Expedition.Core.Services
 						// display to output
 						log.Append($"{hash} {status}");
 						execute.LogLine(log.ToString());
+
+						// update totals
+						totalDataProcessed += file.Length;
 					}
 					catch (Exception ex)
 					{
@@ -183,18 +191,34 @@ namespace Expedition.Core.Services
 					}
 				}
 
-				// save file list
-				execute.Files = files.ToArray();
-				execute.LogLine($"TOTAL FILES: {files.Count}");
-				//if (queryResult.Errors.Count > 0) execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
-				if (execute.Exceptions.Count > 0) execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
+				// show output
+				var time = DateTime.Now.Subtract(execute.Request.Started);
+				var mb = totalDataProcessed / 1024.0 / 1024.0;
+				var gb = mb / 1024;
+				var tb = gb / 1024;
+				var gbh = gb / time.TotalHours;
+				var mbs = mb / time.TotalMinutes;
+				execute.LogLine($"==================================================");
+				execute.LogLine($"FILES: {files.Count:###,###,###,###,###,##0}");
+				execute.LogLine($"BYTES: {totalDataProcessed:###,###,###,###,###,##0} = {gb:###,###,###,###,###,##0} GB = {tb:###,###,###,###,###,##0} TB");
+				execute.LogLine($"TIME: {time:hh\\:mm\\:ss} H:M:S = {time.TotalSeconds:###,###,###,###,##0} SEC");
+				execute.LogLine($"--------------------------------------------------");
+				execute.LogLine($"RATE: {gbh:##,##0.0} GB/HOUR = {mbs:##,##0.0} MB/SEC");
+
+				if (execute.Exceptions.Count > 0)
+				{
+					execute.LogLine($"##################################################");
+					execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
+				}
 
 				// close out report
 				if (report != null)
 				{
+					execute.LogLine($"--------------------------------------------------");
 					execute.LogLine($"SAVING REPORT: {execute.ReportFileUri}");
 					report.SaveAs(execute.ReportFileUri);
 				}
+
 			}
 		}
 	}

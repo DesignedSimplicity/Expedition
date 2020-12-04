@@ -32,7 +32,7 @@ namespace Expedition.Core.Services
 
 	public class VerifyChecksumsExecute : ChecksumsExecute
 	{
-		public VerifyChecksumsRequest Request { get; private set; }
+		public new VerifyChecksumsRequest Request => (VerifyChecksumsRequest)base.Request;
 
 		public string[] FileContents { get; set; }
 
@@ -42,10 +42,8 @@ namespace Expedition.Core.Services
 
 		public HashType HashType { get; set; } = HashType.Md5;
 
-		public VerifyChecksumsExecute(VerifyChecksumsRequest request)
+		public VerifyChecksumsExecute(VerifyChecksumsRequest request) : base(request)
 		{
-			_request = Request = request;
-
 			InputFileUri = request.FileUri;
 		}
 	}
