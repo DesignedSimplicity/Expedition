@@ -19,3 +19,15 @@ The secondary goal was to create an easily consumable report of the hashing or v
 #### Generate and browse snapshots of file metadata (size/date/etc)
 
 Additional goals will be accomplished with new utilities built on an as needed basis.  Lookout is a simple Windows Forms application to visualize a file system tree while providing functionality to recursively flatten and regroup the files contained in a directory and its subdirectories. This is used to strategize backup procedures and refactor file system structures.
+
+##### TODO
+
+1. Optionally output summary into footer of MD5 file
+
+1. Service to compare two MD5 files for add/remove/change
+
+1. Test/support passing in a file name to create file (ie: Prefix_YYYYMMDD)
+
+1. Display detailed aggregate console report at end - total dir/file size/type/count, min/max/avg size + speed - top 10 largest dirs/files
+
+1. Build multithreaded windows list view UI to report real time console output in data grid with columns and constantly updated aggregated report with a progressbar/timeline/graph

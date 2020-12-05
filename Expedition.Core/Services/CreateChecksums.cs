@@ -117,9 +117,11 @@ namespace Expedition.Core.Services
 						{
 							// calculate hash and output hash to log
 							var s = new Stopwatch();
+							s.Start();
 							hash = HashCalc.GetHash(fileName, algorithm);
+							var rate = file.Length / (s.ElapsedMilliseconds + 1);
 							s.Stop();
-							execute.LogLine($" {hasher} = {hash} @ {file.Length / s.ElapsedMilliseconds} b/ms");
+							execute.LogLine($" {hasher} = {hash} @ {rate:###,###,###,###,##0} b/ms");
 						}
 
 						// format and write checksum to stream
