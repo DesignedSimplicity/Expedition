@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32519.111
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expedition2.Core", "Expedition2.Core.csproj", "{AF22F5B2-1691-4D06-B8F0-DA51AC1C3D3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expedition2.Scout", "..\Expedition2.Scout\Expedition2.Scout.csproj", "{4E3CAB83-CB24-4A4E-AB06-A0E04B67C6B0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{32E2576A-35AB-47A2-B6AB-D16EC8A36B39}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AF22F5B2-1691-4D06-B8F0-DA51AC1C3D3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF22F5B2-1691-4D06-B8F0-DA51AC1C3D3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF22F5B2-1691-4D06-B8F0-DA51AC1C3D3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF22F5B2-1691-4D06-B8F0-DA51AC1C3D3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E3CAB83-CB24-4A4E-AB06-A0E04B67C6B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E3CAB83-CB24-4A4E-AB06-A0E04B67C6B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E3CAB83-CB24-4A4E-AB06-A0E04B67C6B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E3CAB83-CB24-4A4E-AB06-A0E04B67C6B0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B18FE1E1-7573-42F2-A1CF-C4C0EC70DF6A}
+	EndGlobalSection
+EndGlobal
