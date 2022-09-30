@@ -10,12 +10,14 @@ namespace Expedition.Core
 {
 	public enum HashType
 	{
+		Sha512 = 64,
 		Sha1 = 40,
 		Md5 = 32,
 	}
 
 	public class HashCalc
 	{
+		/*
 		public static string GetSHA1(string uri)
 		{
 			using (var sha1 = new SHA1CryptoServiceProvider())
@@ -43,6 +45,7 @@ namespace Expedition.Core
             }
             catch { return false; }
         }
+		*/
 
         public static string GetMD5(Stream stream)
 		{
@@ -64,10 +67,12 @@ namespace Expedition.Core
 
 		public static HashAlgorithm GetHashAlgorithm(HashType hasher)
 		{
-			if (hasher == HashType.Md5)
-				return new MD5CryptoServiceProvider();
-			else
+			if (hasher == HashType.Sha1)
 				return new SHA1CryptoServiceProvider();
+			else if (hasher == HashType.Sha512)
+				return new SHA512CryptoServiceProvider(); 
+			else
+				return new MD5CryptoServiceProvider(); 
 		}
 	}
 }

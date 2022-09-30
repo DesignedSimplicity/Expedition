@@ -213,7 +213,6 @@
             this.cmdStartClearResults,
             this.importOnlyToolStripMenuItem,
             this.cmdStartSelectDir});
-            this.cmdStart.Image = global::Expedition.Win.NavTree.Properties.Resources.start;
             this.cmdStart.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.cmdStart.Name = "cmdStart";
             this.cmdStart.Size = new System.Drawing.Size(63, 22);

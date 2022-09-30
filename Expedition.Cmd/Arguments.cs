@@ -30,6 +30,10 @@ namespace Expedition.Cmd
 						case "-sha1":
 							HashType = Core.HashType.Sha1;
 							break;
+						case "-512":
+						case "-sha512":
+							HashType = Core.HashType.Sha512;
+							break;
 						case "-p":
 						case "-preview":
 							RunAsPreview = true;
@@ -47,7 +51,7 @@ namespace Expedition.Cmd
 							{
 								DirectoryUri = arg;
 							}
-							else if (a.EndsWith(".md5") || a.EndsWith(".sha1"))
+							else if (a.EndsWith(".md5") || a.EndsWith(".sha1") || a.EndsWith(".sha512"))
 							{
 								FileUri = arg.Trim();
 							}

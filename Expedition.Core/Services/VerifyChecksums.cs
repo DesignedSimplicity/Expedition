@@ -55,6 +55,12 @@ namespace Expedition.Core.Services
 						int len = 0;
 						var fix = line.Replace('\t', ' ');
 
+						// check first 64 characters is hex + 65 is space
+						if (len == 0 && fix.Length > 128)
+						{
+							if (IsHexidecimal(fix.Substring(0, 128)) && fix[128] == ' ') len = 128;
+						}
+
 						// check first 40 characters is hex + 41 is space
 						if (len == 0 && fix.Length > 40)
 						{
@@ -71,9 +77,18 @@ namespace Expedition.Core.Services
 						if (len > 0)
 						{
 							// set up hash comparison type
-							execute.HashType = len == 40
-								? HashType.Sha1
-								: HashType.Md5;
+							switch (len)
+							{
+								case 128:
+									execute.HashType = HashType.Sha512;
+									break;
+								case 40:
+									execute.HashType = HashType.Sha1;
+									break;
+								default:
+									execute.HashType = HashType.Md5;
+									break;
+							}
 
 							// check file name exists
 							var file = fix.Substring(len + 1).Trim();
@@ -97,9 +112,7 @@ namespace Expedition.Core.Services
 				if (File.Exists(excel)) throw new Exception($"Output report file '{excel}' already exists");
 				execute.ReportFileUri = excel;
 			}
-		}
-
-		
+		}		
 
 		private void Execute(VerifyChecksumsExecute execute)
 		{

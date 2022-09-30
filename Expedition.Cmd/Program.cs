@@ -16,7 +16,7 @@ namespace Expedition.Cmd
 		static void Main(string[] args)
 		{
 			//"D:\Development\Sources\Expedition\Expedition.Cmd\bin\Debug\Scout.exe"
-			//args = new string[] { @"D:\_TEMP\_20181022-172051.md5", "-r", "" };
+			args = new string[] { @"W:\Sources\GitHub\Expedition\Expedition.Cmd\bin\Debug\_20220930-135751.sha512", "", "" };
 
 			/* TODO:
 			 * Combine Error/Exception in Execute/Response
@@ -60,7 +60,8 @@ namespace Expedition.Cmd
 					if (!arguments.CreateReport && arguments.PromptOutput())
 					{
 						var now = DateTime.Now;
-						var logFile = $"Errors_{now:yyyyMMdd}-{now:HHmmss}.txt";
+						var baseFileName = Path.GetFileNameWithoutExtension(arguments.FileUri);
+						var logFile = baseFileName + $"-ERRORS_{now:yyyyMMdd}-{now:HHmmss}.txt";
 						File.WriteAllText(logFile, errorLog.ToString());
 					}
 				}
@@ -97,6 +98,7 @@ namespace Expedition.Cmd
 			if (arguments.RunAsPreview) Console.Write(" -preview");
 			if (arguments.CreateReport) Console.Write(" -report");
 			if (arguments.HashType == Core.HashType.Sha1) Console.Write(" -sha1");
+			if (arguments.HashType == Core.HashType.Sha512) Console.Write(" -sha512");
 			Console.WriteLine();
 
 			// get starting directory
