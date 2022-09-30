@@ -20,7 +20,6 @@ namespace Expedition.Cmd
 
 			/* TODO:
 			 * Combine Error/Exception in Execute/Response
-			 * Add -verify assumes verify on first md5 file found in current directory
 			 * Add simple performance/benchmark summary
 			 * Add sheet for directory sizes/counts
 			 * Add sheet for exceptions/errors
@@ -50,7 +49,7 @@ namespace Expedition.Cmd
 					Console.WriteLine($"ERRORS: {response.Errors.Count}");					
 					foreach (var error in response.Errors)
 					{
-						var errorText = $"ERROR #{errorCount.ToString("0000")}: {error.Key} = {error.Value.Message}";
+						var errorText = $"ERROR #{errorCount:0000}: {error.Key} = {error.Value.Message}";
 						errorLog.AppendLine(errorText);
 						Console.WriteLine(errorText);
 						errorCount++;
