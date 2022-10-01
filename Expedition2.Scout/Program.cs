@@ -9,9 +9,11 @@ var parser = new Parser(with =>
 	with.CaseInsensitiveEnumValues = true;
 });
 
+var engine = new PatrolEngine();
+
 var result = parser.ParseArguments<CreateOptions, VerifyOptions>(args)
-	.WithParsed<CreateOptions>(x => Engine.DoCreate(x))
-	.WithParsed<VerifyOptions>(x => Engine.DoVerify(x));
+	.WithParsed<CreateOptions>(x => engine.DoCreate(x))
+	.WithParsed<VerifyOptions>(x => engine.DoVerify(x));
 
 if (result.Tag == ParserResultType.NotParsed)
 {

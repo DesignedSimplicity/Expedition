@@ -6,20 +6,7 @@ using System.Threading.Tasks;
 
 namespace Expedition2.Scout
 {
-	internal class DataEngine
-	{
-		IEnumerable<FolderPatrolInfo> LoadFolders(string uri)
-		{
-			return null;
-		}
-
-		IEnumerable<FileInfo> LoadFiles(string uri, bool recursive = false, string? filter = null)
-		{
-			return null;
-		}
-	}
-
-	internal class CompoundInfo
+	public class CompoundInfo
 	{
 		// unique
 		public int Id;
@@ -36,10 +23,10 @@ namespace Expedition2.Scout
 		public DateTime? FirstStored;
 		public DateTime? LastVerified;
 
-		bool FileOrFolder;  // Drive/Root/Folder/File
+		//bool FileOrFolder;  // Drive/Root/Folder/File
 	}
 
-	internal class FolderPatrolInfo : CompoundInfo
+	public class FolderPatrolInfo : CompoundInfo
 	{
 		// summary
 		public long TotalFileCount;
@@ -49,19 +36,19 @@ namespace Expedition2.Scout
 
 		string Description; // put into aggregate readme file
 
-		SourcePatrolInfo[] Patrols; // list of hash files associated directly with this folder or file
+		//SourcePatrolInfo[] Patrols; // list of hash files associated directly with this folder or file
 	}
 
-	internal class FilePatrolInfo : CompoundInfo
+	public class FilePatrolInfo : CompoundInfo
 	{
 		// details
 		public string Extension;
-		public string FileType;
+		//public string FileType;
 		public long FileSize;
 
-		string Md5;
+		public string Md5;
 		string Sha1;
-		string Sha512;
+		public string Sha512;
 
 		int FileStatus;     // enum flags
 		int HashStatus;     // enum flags
@@ -74,21 +61,23 @@ namespace Expedition2.Scout
 		string Notes;
 		string Tags;
 
-		SourcePatrolInfo Patrol;
+		//SourcePatrolInfo Patrol;
 	}
 
-	internal class SourcePatrolInfo
+	public class SourcePatrolInfo
 	{
 		Guid PatrolGuid;
 
-		public string SourceUri;
-		public string TargetUri;
-		
-		string SourceType;
-		string HashType;
+		public string SourceUri;	// full uri to the patrol metadata source of truth file
+		public string TargetUri;    // full uri to assoicated directory on live filestream
+
+		public SourceType SourceType;	// FileSystem, PatrolSource
+		string HashType;	// Md5, Sha1, Sha512
 		
 		public long TotalFolderCount;
 		public long TotalFileCount;
 		public long TotalFileSize;
 	}
+
+	public enum SourceType { FileSystem, PatrolSource };
 }

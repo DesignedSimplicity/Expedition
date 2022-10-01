@@ -9,58 +9,13 @@ using Expedition2.Core2;
 
 namespace Expedition2.Scout
 {
-	public class CommonOptions
-	{
-		[Value(0)]
-		public string? Name { get; set; }
-
-		[Option('s', "silent", HelpText = "Suppresses detailed console output")]
-		public bool Silent { get; set; }
-
-		[Option('p', "pause", HelpText = "Pause on file system errors")]
-		public bool Pause { get; set; }
-
-		[Option('l', "log", HelpText = "Create a simple text log")]
-		public bool Log { get; set; }
-
-		[Option('e', "error", HelpText = "Create an error log only")]
-		public bool Error { get; set; }
-
-		[Option('r', "report", HelpText = "Create a detailed report in Excel")]
-		public bool Report { get; set; }
-
-		/*
-		[Option('t', "threads", HelpText = "Set the number of threads for hashing", Min =1, Max =64)]
-		public int Threads { get; set; }
-		*/
-	}
-
-	[Verb("create", HelpText = "Creates a new hash report")]
-	public class CreateOptions : CommonOptions
-	{
-		[Option("md5")]
-		public bool Md5 { get; set; }
-
-		[Option("sha1")]
-		public bool Sha1 { get; set; }
-
-		[Option("sha512")]
-		public bool Sha512 { get; set; }
-
-		[Option('f', "filter", HelpText = "Filename wildcard filter")]
-		public string? Filter { get; set; }
-	}
-
-	[Verb("verify", HelpText = "Verifies an existing hash report")]
-	public class VerifyOptions : CommonOptions
-	{
-	}
-
 	// async and crypto https://stackoverflow.com/questions/48897692/how-does-asynchronous-file-hash-and-disk-write-actually-work
 
-	internal class Engine
+	internal class PatrolEngine
 	{
-		public static void DoCommon(CommonOptions c)
+		private readonly PatrolFactory _factory = new PatrolFactory();
+
+		public void DoCommon(CommonOptions c)
 		{
 			Console.WriteLine($"Name:\t{c.Name}");
 			Console.WriteLine($"Silent:\t{c.Silent}");
@@ -70,7 +25,14 @@ namespace Expedition2.Scout
 			Console.WriteLine($"Report:\t{c.Report}");
 		}
 
-		public static void DoCreate(CreateOptions c)
+		public void DoVerify(VerifyOptions v)
+		{
+			Console.WriteLine($"Verify");
+			DoCommon(v);
+		}
+
+
+		public void DoCreate(CreateOptions c)
 		{
 			Console.WriteLine($"Create");
 			DoCommon(c);
@@ -100,13 +62,12 @@ namespace Expedition2.Scout
 			// if name file does not exist, create patrol file name base
 
 			var root = new DirectoryInfo(sourceUri);
-			Console.WriteLine(root.FullName);
-			
+			Console.WriteLine(root.FullName);			
 
 			var dirs = root.EnumerateDirectories("", SearchOption.AllDirectories);
-			Console.WriteLine($"Folders:\t{dirs.Count()}");
+			Console.WriteLine($"Folders:\t{dirs.Count():###,###,###,###,###,##0}");
 
-			List<FolderPatrolInfo> folders = dirs.Select(x => GetFolder(x)).ToList();
+			IEnumerable<FolderPatrolInfo> folders = _factory.LoadFolders(root.FullName, true);
 			List<FilePatrolInfo> files = new List<FilePatrolInfo>();			
 			
 			foreach(var folder in folders)
@@ -117,10 +78,8 @@ namespace Expedition2.Scout
 				
 				patrol.TotalFolderCount++;
 
-				var dirFiles = dir.EnumerateFiles(filter);
-				Console.WriteLine($"Files:\t{dirFiles.Count()}");
-
-				var list = dirFiles.Select(x => GetFile(x));
+				var list = _factory.LoadFiles(folder.Uri, false, filter);
+				Console.WriteLine($"Files:\t{list.Count()}");
 				files.AddRange(list);
 				foreach (var file in list)
 				{
@@ -135,44 +94,27 @@ namespace Expedition2.Scout
 
 			Console.WriteLine($"==================================================");
 			Console.WriteLine($"Target Output File:\t{patrol.SourceUri}");
-			Console.WriteLine($"Total Folder Count:\t{patrol.TotalFolderCount}");
-			Console.WriteLine($"Total File Count:\t{patrol.TotalFileCount}");
-			Console.WriteLine($"Total File Size:\t{patrol.TotalFileSize}");
-		}
+			Console.WriteLine($"Total Folder Count:\t{patrol.TotalFolderCount:###,###,###,###,###,##0}");
+			Console.WriteLine($"Total File Count:\t{patrol.TotalFileCount:###,###,###,###,###,##0}");
+			Console.WriteLine($"Total File Size:\t{patrol.TotalFileSize:###,###,###,###,###,##0}");
+			Console.WriteLine($"");
 
-		public static FolderPatrolInfo GetFolder(DirectoryInfo d)
-		{
-			var x = new FolderPatrolInfo();
-			x.Uri = d.FullName;
-			x.Name = d.Name;
+			Console.WriteLine($"==================================================");
+			Console.WriteLine($"Start Hash");
+			var md5 = Hasher.GetHashAlgorithm(HashType.Md5);
+			var sha512 = Hasher.GetHashAlgorithm(HashType.Sha512);
+			foreach (var file in files)
+			{
+				Console.Write($"{file.Uri}\t{file.FileSize:###,###,###,###,###,##0}");
 
-			x.Created = d.CreationTimeUtc;
-			x.Updated = d.LastWriteTimeUtc;
+				file.Md5 = Hasher.GetHash(file.Uri, md5);
+				Console.Write($"\t{file.Md5}");
 
-			return x;
-		}
+				file.Sha512 = Hasher.GetHash(file.Uri, sha512);
+				Console.WriteLine($"\t{file.Sha512}");
 
-
-		public static FilePatrolInfo GetFile(FileInfo f)
-		{
-			var x = new FilePatrolInfo();
-			x.Uri = f.FullName;
-			x.Name = f.Name;
-			
-			x.Extension = f.Extension.ToUpperInvariant();
-			x.FileSize = f.Length;
-
-			x.Created = f.CreationTimeUtc;
-			x.Updated = f.LastWriteTimeUtc;
-
-			return x;
-		}
-
-
-		public static void DoVerify(VerifyOptions v)
-		{
-			Console.WriteLine($"Verify");
-			DoCommon(v);
+				file.FirstStored = file.LastVerified = DateTime.UtcNow;				
+			}
 		}
 	}
 }
