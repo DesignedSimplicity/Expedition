@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expedition2.Scout", "..\Exp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{32E2576A-35AB-47A2-B6AB-D16EC8A36B39}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expedition2.Lookout", "..\Expedition2.Lookout\Expedition2.Lookout.csproj", "{3914353F-708B-494C-8A6B-EF5BF53EC67B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{4E3CAB83-CB24-4A4E-AB06-A0E04B67C6B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E3CAB83-CB24-4A4E-AB06-A0E04B67C6B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E3CAB83-CB24-4A4E-AB06-A0E04B67C6B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3914353F-708B-494C-8A6B-EF5BF53EC67B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3914353F-708B-494C-8A6B-EF5BF53EC67B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3914353F-708B-494C-8A6B-EF5BF53EC67B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3914353F-708B-494C-8A6B-EF5BF53EC67B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

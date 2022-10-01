@@ -14,11 +14,14 @@ namespace Expedition2.Core2.Parse
 		private const string PercentFormat = "#0.0%";
 		private const string NumberFormat = "###,###,##0";
 		private const string MoneyFormat = "$###,###,##0.00";
-		private const string _dateFormat = "yyyy-MM-dd";
+		private const string DateFormat = "yyyy-MM-dd";
 
 		private readonly ExcelPackage _excel = new ExcelPackage();
 
-		private ExcelWorksheet? _worksheet;
+		private ExcelWorksheet _summary;
+		private ExcelWorksheet _folders;
+		private ExcelWorksheet _files;
+
 		private bool _head = false;
 		private bool _foot = false;
 		private int _row;
@@ -27,6 +30,9 @@ namespace Expedition2.Core2.Parse
 		public ParseExcel()
 		{
 			ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+			_summary = NewWorksheet("Summary");
+			_folders = NewWorksheet("Folders");
+			_files = NewWorksheet("Files");
 		}
 
 		public void SaveAs(string uri)
@@ -36,23 +42,39 @@ namespace Expedition2.Core2.Parse
 			if (!_foot) FinishFileSheet();
 
 			_excel.SaveAs(excel);
-			_worksheet.Dispose();
+			_summary.Dispose();
+			_folders.Dispose();
+			_files.Dispose();
 			_excel.Dispose();
+		}
+
+		public void Dispose()
+		{
+			_summary.Dispose();
+			_folders.Dispose();
+			_files.Dispose();
+			_excel.Dispose();
+		}
+
+		private ExcelWorksheet NewWorksheet(string name)
+		{
+			var ws = _excel.Workbook.Worksheets.Add(name);
+			ws.Row(1).Style.Fill.PatternType = ExcelFillStyle.Solid;
+			ws.Row(1).Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Black);
+			ws.Row(1).Style.Font.Color.SetColor(System.Drawing.Color.White);
+			return ws;
 		}
 
 		private void AddWorksheet(string name)
 		{
-			_worksheet = _excel.Workbook.Worksheets.Add(name);
-			_worksheet.Row(1).Style.Fill.PatternType = ExcelFillStyle.Solid;
-			_worksheet.Row(1).Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Black);
-			_worksheet.Row(1).Style.Font.Color.SetColor(System.Drawing.Color.White);
+			_files = NewWorksheet(name);
 		}
 
 		private void AutoFormatColumns(int count, string format)
 		{
 			for (var index = 1; index <= count; index++)
 			{
-				_worksheet.Column(index).Style.Numberformat.Format = format;
+				_files.Column(index).Style.Numberformat.Format = format;
 			}
 		}
 
@@ -60,7 +82,7 @@ namespace Expedition2.Core2.Parse
 		{
 			for (var index = 1; index <= count; index++)
 			{
-				_worksheet.Column(index).AutoFit();
+				_files.Column(index).AutoFit();
 			}
 		}
 
@@ -72,17 +94,17 @@ namespace Expedition2.Core2.Parse
 			_row = 1;
 			_col = 1;
 
-			_worksheet.Cells[_row, _col++].Value = "ExId";
-			_worksheet.Cells[_row, _col++].Value = "Status";
-			_worksheet.Cells[_row, _col++].Value = "Exception";
-			_worksheet.Cells[_row, _col++].Value = "Uri";
-			_worksheet.Cells[_row, _col++].Value = "Directory";
-			_worksheet.Cells[_row, _col++].Value = "File";
-			_worksheet.Cells[_row, _col++].Value = "Type";
-			_worksheet.Cells[_row, _col++].Value = "Size";
-			_worksheet.Cells[_row, _col++].Value = "Hash";
-			_worksheet.Cells[_row, _col++].Value = "Created";
-			_worksheet.Cells[_row, _col++].Value = "Modified";
+			_files.Cells[_row, _col++].Value = "ExId";
+			_files.Cells[_row, _col++].Value = "Status";
+			_files.Cells[_row, _col++].Value = "Exception";
+			_files.Cells[_row, _col++].Value = "Uri";
+			_files.Cells[_row, _col++].Value = "Directory";
+			_files.Cells[_row, _col++].Value = "File";
+			_files.Cells[_row, _col++].Value = "Type";
+			_files.Cells[_row, _col++].Value = "Size";
+			_files.Cells[_row, _col++].Value = "Hash";
+			_files.Cells[_row, _col++].Value = "Created";
+			_files.Cells[_row, _col++].Value = "Modified";
 		}
 
 
@@ -97,17 +119,17 @@ namespace Expedition2.Core2.Parse
 			if (String.IsNullOrWhiteSpace(status)) status = String.IsNullOrWhiteSpace(hash) ? "INFO" : "HASH";
 			if (String.IsNullOrWhiteSpace(hash)) hash = "";
 			if (String.IsNullOrWhiteSpace(error)) error = "";
-			_worksheet.Cells[_row, col++].Value = exid;
-			_worksheet.Cells[_row, col++].Value = status;
-			_worksheet.Cells[_row, col++].Value = error;
-			_worksheet.Cells[_row, col++].Value = file.FullName;
-			_worksheet.Cells[_row, col++].Value = file.Directory.Name;
-			_worksheet.Cells[_row, col++].Value = file.Name;
-			_worksheet.Cells[_row, col++].Value = file.Extension;
-			_worksheet.Cells[_row, col++].Value = file.Length;
-			_worksheet.Cells[_row, col++].Value = hash;
-			_worksheet.Cells[_row, col++].Value = file.CreationTimeUtc;
-			_worksheet.Cells[_row, col++].Value = file.LastWriteTimeUtc;
+			_files.Cells[_row, col++].Value = exid;
+			_files.Cells[_row, col++].Value = status;
+			_files.Cells[_row, col++].Value = error;
+			_files.Cells[_row, col++].Value = file.FullName;
+			_files.Cells[_row, col++].Value = file.Directory.Name;
+			_files.Cells[_row, col++].Value = file.Name;
+			_files.Cells[_row, col++].Value = file.Extension;
+			_files.Cells[_row, col++].Value = file.Length;
+			_files.Cells[_row, col++].Value = hash;
+			_files.Cells[_row, col++].Value = file.CreationTimeUtc;
+			_files.Cells[_row, col++].Value = file.LastWriteTimeUtc;
 		}
 
 		public void FinishFileSheet()
@@ -120,8 +142,8 @@ namespace Expedition2.Core2.Parse
 			// do manual formatting
 			//_worksheet.Column(_col).Style.Numberformat.Format = _percentFormat;
 			//_worksheet.Column(_col).Style.Numberformat.Format = _moneyFormat;
-			_worksheet.Column(_col - 2).Style.Numberformat.Format = _dateFormat;
-			_worksheet.Column(_col - 1).Style.Numberformat.Format = _dateFormat;
+			_files.Column(_col - 2).Style.Numberformat.Format = DateFormat;
+			_files.Column(_col - 1).Style.Numberformat.Format = DateFormat;
 
 			// auto size columns
 			//AutoFitColumns(_col - 1);
