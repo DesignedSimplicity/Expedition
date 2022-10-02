@@ -7,6 +7,9 @@ using Pastel;
 using CommandLine;
 using Expedition2.Core;
 using System.Drawing;
+using Expedition2.Core.Services;
+using OfficeOpenXml.Utils;
+using OfficeOpenXml.Style;
 
 namespace Expedition2.Patrol
 {
@@ -39,8 +42,8 @@ namespace Expedition2.Patrol
 		{
 			// display patrol estimate
 			Console.WriteLine($"==================================================");
-			Console.WriteLine($"Patrol Source Uri:\t{patrol.SourceUri}");
-			Console.WriteLine($"Folder Target Uri:\t{patrol.TargetUri}");
+			Console.WriteLine($"Patrol Source Uri:\t{patrol.SourcePatrolUri}");
+			Console.WriteLine($"Folder Target Uri:\t{patrol.TargetFolderUri}");
 			Console.WriteLine($"Total Folder Count:\t{patrol.TotalFolderCount:###,###,###,###,###,##0}");
 			Console.WriteLine($"Total File Count:\t{patrol.TotalFileCount:###,###,###,###,###,##0}");
 			Console.WriteLine($"Total File Size:\t{patrol.TotalFileSize:###,###,###,###,###,##0}".Pastel(Color.DarkGray));
@@ -49,6 +52,44 @@ namespace Expedition2.Patrol
 
 
 		public void DoCreate(CreateOptions c)
+		{
+			DoCommon(c);
+
+			Console.WriteLine($"Create");
+			Console.WriteLine($"Filter:\t{c.Filter}");
+			Console.WriteLine($"==================================================");
+
+			// access source directory if exists, assume current if null
+			var sourceUri = Directory.Exists(c.Name) ? c.Name : ".";
+
+			// prepare service request
+			var request = new CreateChecksumsRequest()
+			{
+				HashType = c.Sha512 ? HashType.Sha512 : HashType.Md5,
+				DirectoryUri = sourceUri,
+				RelativeToUri = sourceUri,
+				FilePattern = c.Filter ?? "",
+				Report = c.Report,
+				Preview = false,
+				//LogStream = Console.Out,
+				ConsoleOut = Console.Out,
+				Recursive = true,
+			};
+
+			// create and execute service request
+			var create = new CreateChecksums();
+			var response = create.Execute(request);
+
+			// TODO do something with list of patrolfiles
+
+		}
+
+
+
+
+
+
+		public void DoCreate2(CreateOptions c)
 		{
 			DoCommon(c);
 			Console.WriteLine($"Create");
@@ -69,12 +110,12 @@ namespace Expedition2.Patrol
 			Console.WriteLine($"Folders:\t{folders.Count():###,###,###,###,###,##0}");
 
 			// gather files for each folder
-			List<FilePatrolInfo> files = new List<FilePatrolInfo>();					
-			foreach(var folder in folders)
+			List<FilePatrolInfo> files = new List<FilePatrolInfo>();
+			foreach (var folder in folders)
 			{
 				Console.WriteLine($"--------------------------------------------------");
 				Console.Write(folder.Uri.Pastel(Color.Yellow));
-				
+
 				// load all files in this directory
 				var list = _factory.LoadFiles(folder.Uri, false, filter);
 
@@ -102,7 +143,7 @@ namespace Expedition2.Patrol
 			// update status
 			Console.WriteLine($"==================================================");
 			Console.WriteLine($"Start Hash");
-			
+
 			// start loop			
 			var hasher = new Hasher();
 			foreach (var file in files)

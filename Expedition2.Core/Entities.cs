@@ -19,12 +19,12 @@ namespace Expedition2.Core
 		/// <summary>
 		/// Full uri to the patrol metadata source of truth file
 		/// </summary>
-		public string SourceUri;
+		public string SourcePatrolUri;
 		
 		/// <summary>
 		/// Full uri to assoicated directory on live filestream
 		/// </summary>
-		public string TargetUri;
+		public string TargetFolderUri;
 
 		public SourceType SourceType;   // FileSystem, PatrolSource
 		public HashType HashType;    // Md5, Sha1, Sha512
@@ -32,6 +32,7 @@ namespace Expedition2.Core
 		public long TotalFolderCount;
 		public long TotalFileCount;
 		public long TotalFileSize;
+		public long TotalSeconds;
 	}
 
 	public class FolderPatrolInfo : CompoundInfo

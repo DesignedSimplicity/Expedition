@@ -12,7 +12,7 @@ namespace Expedition2.Core.Services
 		/// <summary>
 		/// Ignore file system access errors
 		/// </summary>
-		public bool Silent { get; set; } = false;
+		public bool ErrorSafe { get; set; } = false;
 
 		/// <summary>
 		/// Manual recursion with status report

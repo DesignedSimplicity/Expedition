@@ -21,8 +21,8 @@ namespace Expedition2.Core
 			p.PatrolName = name;
 			p.HashType = HashType.Md5;
 
-			p.TargetUri = d.FullName;
-			p.SourceUri = Path.Combine(d.FullName, name) + ".patrol";
+			p.TargetFolderUri = d.FullName;
+			p.SourcePatrolUri = Path.Combine(d.FullName, name) + ".patrol";
 			p.SourceType = SourceType.FileSystem;
 
 			return p;
@@ -34,8 +34,8 @@ namespace Expedition2.Core
 			p.PatrolName = f.Name;
 			p.HashType = HashType.Md5;
 
-			p.TargetUri = f.Directory?.FullName ?? "";
-			p.SourceUri = f.FullName;
+			p.TargetFolderUri = f.Directory?.FullName ?? "";
+			p.SourcePatrolUri = f.FullName;
 			p.SourceType = SourceType.PatrolSource;
 
 			return p;

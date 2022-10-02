@@ -95,7 +95,7 @@ namespace Expedition2.Scout
 			}
 
 			Console.WriteLine($"==================================================");
-			Console.WriteLine($"Target Output File:\t{patrol.SourceUri}");
+			Console.WriteLine($"Target Output File:\t{patrol.SourcePatrolUri}");
 			Console.WriteLine($"Total Folder Count:\t{patrol.TotalFolderCount:###,###,###,###,###,##0}");
 			Console.WriteLine($"Total File Count:\t{patrol.TotalFileCount:###,###,###,###,###,##0}");
 			Console.WriteLine($"Total File Size:\t{patrol.TotalFileSize:###,###,###,###,###,##0}".Pastel(Color.DarkGray));

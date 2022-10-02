@@ -40,7 +40,7 @@ namespace Expedition2.Core.Services
 
 		public string Message { get; set; } = string.Empty;
 
-		public Exception Exception { get; set; } = null;
+		public Exception? Exception { get; set; } = null;
 
 
 		public BaseFileSytemState(FileInfo file, BaseFileSytemStatus status = BaseFileSytemStatus.Default, string message = "")
@@ -150,6 +150,10 @@ namespace Expedition2.Core.Services
 		protected IChecksumsRequest _checksumsRequest;
 
 		public FileInfo[] Files { get; set; }
+
+		public SourcePatrolInfo PatrolSource { get; set; }
+		public FolderPatrolInfo[] PatrolFolders { get; set; }
+		public FilePatrolInfo[] PatrolFiles { get; set; }
 
 		public Dictionary<string, Exception> Exceptions { get; private set; } = new Dictionary<string, Exception>();
 

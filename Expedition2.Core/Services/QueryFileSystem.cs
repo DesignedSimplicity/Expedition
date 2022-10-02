@@ -51,7 +51,7 @@ namespace Expedition2.Core.Services
 						// log exception and re-throw if not silent
 						response.Errors.Add(file.FullName, ex);
 						execute.SetState(new BaseFileSytemState(file, ex));
-						if (!request.Silent) throw ex;
+						if (!request.ErrorSafe) throw ex;
 					}
 				}
 				if (request.Recursive)
@@ -73,7 +73,7 @@ namespace Expedition2.Core.Services
 									// log exception and re-throw if not silent
 									response.Errors.Add(file.FullName, ex);
 									execute.SetState(new BaseFileSytemState(file, ex));
-									if (!request.Silent) throw ex;
+									if (!request.ErrorSafe) throw ex;
 								}
 							}
 						}
@@ -82,7 +82,7 @@ namespace Expedition2.Core.Services
 							// log exception and re-throw if not silent
 							response.Errors.Add(sub.FullName, ex);
 							//execute.SetState(new ChecksumSystemState(sub, ChecksumSystemStatus.Unknown, ex));
-							if (!request.Silent) throw ex;
+							if (!request.ErrorSafe) throw ex;
 						}
 					}
 				}
@@ -99,7 +99,7 @@ namespace Expedition2.Core.Services
 				{
 					// log exception and re-throw if not silent
 					response.Errors.Add($"Directory = {dir?.FullName}", ex);
-					if (!request.Silent) throw ex;
+					if (!request.ErrorSafe) throw ex;
 				}
 			}
 

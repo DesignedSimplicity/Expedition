@@ -26,6 +26,11 @@ namespace Expedition2.Core.Services
 		public TextWriter LogStream { get; set; }
 
 		/// <summary>
+		/// Console writer for status display output
+		/// </summary>
+		public TextWriter ConsoleOut { get; set; }
+
+		/// <summary>
 		/// Checks access without creating hashes
 		/// </summary>
 		public bool Preview { get; set; } = false;
