@@ -57,7 +57,6 @@ namespace Expedition2.Patrol
 
 			Console.WriteLine($"Create");
 			Console.WriteLine($"Filter:\t{c.Filter}");
-			Console.WriteLine($"==================================================");
 
 			// access source directory if exists, assume current if null
 			var sourceUri = Directory.Exists(c.Name) ? c.Name : ".";
