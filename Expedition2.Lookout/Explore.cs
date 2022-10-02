@@ -7,5 +7,9 @@ namespace Expedition2.Lookout
 			InitializeComponent();
 
 		}
+
+		private void cmdGo_Click(object sender, EventArgs e)
+		{
+		}
 	}
 }

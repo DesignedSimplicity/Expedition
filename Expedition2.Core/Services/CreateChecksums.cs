@@ -1,4 +1,4 @@
-﻿using Expedition2.Core2.Parse;
+﻿using Expedition2.Core.Parse;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Expedition2.Core2.Services
+namespace Expedition2.Core.Services
 {
 	public class CreateChecksums
 	{

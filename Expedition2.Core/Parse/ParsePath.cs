@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Expedition2.Core2
+namespace Expedition2.Core
 {
 	public class ParsePath
 	{

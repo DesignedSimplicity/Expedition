@@ -8,11 +8,11 @@ using CommandLine;
 using Expedition2.Core;
 using System.Drawing;
 
-namespace Expedition2.Scout
+namespace Expedition2.Patrol
 {
 	// async and crypto https://stackoverflow.com/questions/48897692/how-does-asynchronous-file-hash-and-disk-write-actually-work
 
-	internal class PatrolEngine
+	internal class Engine
 	{
 		private readonly Factory _factory = new Factory();
 
@@ -33,97 +33,102 @@ namespace Expedition2.Scout
 		}
 
 
-		public void DoCreate(CreateOptions c)
+
+
+		private void DisplayPatrolSummary(SourcePatrolInfo patrol)
 		{
-			Console.WriteLine($"Create");
-			DoCommon(c);
-
-			//Console.WriteLine($"Hash:\t{c.HashType.ToString().Pastel("009900")}");
-			var filter = c.Filter ?? "";
-			Console.WriteLine($"Filter:\t{filter}");
-
+			// display patrol estimate
 			Console.WriteLine($"==================================================");
-
-			var patrol = new SourcePatrolInfo();
-			/*
-			if (String.IsNullOrEmpty(c.Name))
-			{
-				c.Name = "YYYYMMDD-HHMMSS";
-				var start = new DirectoryInfo(".");
-				patrol.TargetUri = start.FullName;
-				patrol.SourceUri = Path.Combine(start.FullName, c.Name);
-			}
-			*/
-			var sourceUri = Directory.Exists(c.Name) ? c.Name : ".";						
-
-			// if name is existing directory and default name to yyyymmdd-hhmmss
-
-			// if name file exist, error in create mode
-			// if name does not exist, default name to yyyymmdd-hhmmss
-			// if name file does not exist, create patrol file name base
-
-			var root = new DirectoryInfo(sourceUri);
-			Console.WriteLine(root.FullName);			
-
-			var dirs = root.EnumerateDirectories("", SearchOption.AllDirectories);
-			Console.WriteLine($"Folders:\t{dirs.Count():###,###,###,###,###,##0}");
-
-			IEnumerable<FolderPatrolInfo> folders = _factory.LoadFolders(root.FullName, true);
-			List<FilePatrolInfo> files = new List<FilePatrolInfo>();			
-			
-			foreach(var folder in folders)
-			{
-				Console.WriteLine($"--------------------------------------------------");
-				Console.Write(folder.Uri.Pastel(Color.Yellow));
-				var dir = new DirectoryInfo(folder.Uri);
-				
-				patrol.TotalFolderCount++;
-
-				var list = _factory.LoadFiles(folder.Uri, false, filter);
-				folder.TotalFileCount = list.Count();
-				folder.TotalFileSize += list.Sum(x => x.FileSize);
-
-				Console.WriteLine($"\tFiles: {folder.TotalFileCount:###,###,###,###,###,##0}\tSize: {folder.TotalFileSize:###,###,###,###,###,##0}");
-				files.AddRange(list);
-				foreach (var file in list)
-				{
-					Console.WriteLine(file.Name.Pastel(Color.Orange));
-				}
-
-				patrol.TotalFileCount += folder.TotalFileCount;
-				patrol.TotalFileSize += folder.TotalFileSize;
-			}
-
-			Console.WriteLine($"==================================================");
-			Console.WriteLine($"Target Output File:\t{patrol.SourceUri}");
+			Console.WriteLine($"Patrol Source Uri:\t{patrol.SourceUri}");
+			Console.WriteLine($"Folder Target Uri:\t{patrol.TargetUri}");
 			Console.WriteLine($"Total Folder Count:\t{patrol.TotalFolderCount:###,###,###,###,###,##0}");
 			Console.WriteLine($"Total File Count:\t{patrol.TotalFileCount:###,###,###,###,###,##0}");
 			Console.WriteLine($"Total File Size:\t{patrol.TotalFileSize:###,###,###,###,###,##0}".Pastel(Color.DarkGray));
 			Console.WriteLine($"");
+		}
 
+
+		public void DoCreate(CreateOptions c)
+		{
+			DoCommon(c);
+			Console.WriteLine($"Create");
+
+			var filter = c.Filter ?? "";
+			Console.WriteLine($"Filter:\t{filter}");
+			//Console.WriteLine($"Hash:\t{c.HashType.ToString().Pastel("009900")}");
+			Console.WriteLine($"==================================================");
+
+			// access source directory if exists, assume current if null
+			var sourceUri = Directory.Exists(c.Name) ? c.Name : ".";
+			var root = new DirectoryInfo(sourceUri);
+			var patrol = _factory.CreateNew(root);
+			Console.WriteLine(root.FullName);
+
+			// find all subdirectories, recursive if specified
+			IEnumerable<FolderPatrolInfo> folders = _factory.LoadFolders(root.FullName, true);
+			Console.WriteLine($"Folders:\t{folders.Count():###,###,###,###,###,##0}");
+
+			// gather files for each folder
+			List<FilePatrolInfo> files = new List<FilePatrolInfo>();					
+			foreach(var folder in folders)
+			{
+				Console.WriteLine($"--------------------------------------------------");
+				Console.Write(folder.Uri.Pastel(Color.Yellow));
+				
+				// load all files in this directory
+				var list = _factory.LoadFiles(folder.Uri, false, filter);
+
+				// account for files
+				files.AddRange(list);
+				folder.TotalFileCount = list.Count();
+				folder.TotalFileSize += list.Sum(x => x.FileSize);
+
+				// update source patrol
+				patrol.TotalFolderCount++;
+				patrol.TotalFileCount += folder.TotalFileCount;
+				patrol.TotalFileSize += folder.TotalFileSize;
+
+				// show output
+				Console.WriteLine($"\tFiles: {folder.TotalFileCount:###,###,###,###,###,##0}\tSize: {folder.TotalFileSize:###,###,###,###,###,##0}");
+				foreach (var file in list)
+				{
+					Console.WriteLine(file.Name.Pastel(Color.Orange));
+				}
+			}
+
+			// display prepre summary
+			DisplayPatrolSummary(patrol);
+
+			// update status
 			Console.WriteLine($"==================================================");
 			Console.WriteLine($"Start Hash");
-			var md5 = Hasher.GetHashAlgorithm(HashType.Md5);
-			var sha512 = Hasher.GetHashAlgorithm(HashType.Sha512);
+			
+			// start loop			
+			var hasher = new Hasher();
 			foreach (var file in files)
 			{
 				Console.Write($"{file.Path}\\{file.Name.Pastel(Color.WhiteSmoke)}\t");
 				Console.Write($"{file.FileSize:###,###,###,###,###,##0}".Pastel(Color.DarkGray));
 
-				file.Md5 = Hasher.GetHash(file.Uri, md5);
+				file.Md5 = hasher.GetHash(file.Uri, HashType.Md5);
 				Console.Write($"\t{file.Md5.Pastel(Color.Green)}");
-				
+
 				/*
-				file.Sha512 = Hasher.GetHash(file.Uri, sha512);
+				file.Sha512 = hasher.GetHash(file.Uri, HashType.Sha512);
 				Console.Write($"\t{file.Sha512.Pastel(Color.LightGreen)}");
 				*/
-
 				Console.WriteLine();
 
 				file.LastVerified = DateTime.UtcNow;
 			}
+			hasher.Dispose();
+
 
 			// TODO: create output file as expected
+
+
+
+
 		}
 	}
 }

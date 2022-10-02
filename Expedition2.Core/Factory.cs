@@ -3,29 +3,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Expedition2.Core;
 
-namespace Expedition2.Scout
+namespace Expedition2.Core
 {
-	public class PatrolFactory
+	public class Factory
 	{
-		private static int _fileId = 0;
-		private static int _folderId = 0;
+		private int _fileId = 0;
+		private int _folderId = 0;
 
 		public SourcePatrolInfo CreateNew(DirectoryInfo d, string? baseFileName = null)
 		{
+			var name = baseFileName ?? DateTime.Now.ToString("yyyyMMdd-HHmmss");
+			
 			var p = new SourcePatrolInfo();
+			p.PatrolName = name;
+			p.HashType = HashType.Md5;
+
 			p.TargetUri = d.FullName;
-			p.SourceUri = Path.Combine(d.FullName, baseFileName ?? "YYYYMMDD") + ".patrol";
+			p.SourceUri = Path.Combine(d.FullName, name) + ".patrol";
 			p.SourceType = SourceType.FileSystem;
+
 			return p;
 		}
 
 		public SourcePatrolInfo StartExisting(FileInfo f)
 		{
 			var p = new SourcePatrolInfo();
+			p.PatrolName = f.Name;
+			p.HashType = HashType.Md5;
+
 			p.TargetUri = f.Directory?.FullName ?? "";
 			p.SourceUri = f.FullName;
 			p.SourceType = SourceType.PatrolSource;
+
 			return p;
 		}
 
@@ -64,14 +76,12 @@ namespace Expedition2.Scout
 
 		public IEnumerable<FolderPatrolInfo> LoadFolders(string uri, bool recursive = false)
 		{
-			var dir = new DirectoryInfo(uri);
-			return dir.EnumerateDirectories("*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Select(x => GetFolder(x));
+			return new DirectoryInfo(uri).EnumerateDirectories("*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Select(x => GetFolder(x));
 		}
 
 		public IEnumerable<FilePatrolInfo> LoadFiles(string uri, bool recursive = false, string? filter = null)
 		{
-			var dir = new DirectoryInfo(uri);
-			return dir.EnumerateFiles(filter ?? "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Select(x => GetFile(x));
+			return new DirectoryInfo(uri).EnumerateFiles(filter ?? "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Select(x => GetFile(x));
 		}
 	}
 }

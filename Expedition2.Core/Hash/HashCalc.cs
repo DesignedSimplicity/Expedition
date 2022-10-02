@@ -6,21 +6,21 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Expedition2.Core2
+namespace Expedition2.Core
 {
-	public enum HashType
-	{
-		Sha512 = 64,
-		Sha1 = 40,
-		Md5 = 32,
-	}
 
 	public class HashCalc
 	{
+        public static string GetMD5(Stream stream)
+		{
+			using (var md5 = new MD5CryptoServiceProvider())
+				return GetHash(stream, md5);
+		}
+
 		public static string GetHash(string filePath, HashAlgorithm hasher)
 		{
-			using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-			return GetHash(fs, hasher);
+			using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				return GetHash(fs, hasher);
 		}
 
 		public static string GetHash(Stream s, HashAlgorithm hasher)
@@ -31,12 +31,12 @@ namespace Expedition2.Core2
 
 		public static HashAlgorithm GetHashAlgorithm(HashType hasher)
 		{
-			if (hasher == HashType.Sha512)
-				return SHA512.Create(); 
-			else if (hasher == HashType.Sha1)
-				return SHA1.Create();
+			if (hasher == HashType.Sha1)
+				return new SHA1CryptoServiceProvider();
+			else if (hasher == HashType.Sha512)
+				return new SHA512CryptoServiceProvider(); 
 			else
-				return MD5.Create();
+				return new MD5CryptoServiceProvider(); 
 		}
 	}
 }

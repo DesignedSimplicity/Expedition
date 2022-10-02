@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Expedition2.Core2.Services
+namespace Expedition2.Core.Services
 {
     public enum PowerSize { KB = 1024, MB = 1048576, GB = 1073741824 }
 

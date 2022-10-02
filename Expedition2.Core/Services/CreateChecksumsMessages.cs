@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Expedition2.Core;
 
-namespace Expedition2.Core2.Services
+namespace Expedition2.Core.Services
 {
 	public class CreateChecksumsRequest : QueryFileSystemRequest, IChecksumsRequest
 	{

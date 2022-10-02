@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Expedition2.Core2.Parse
+namespace Expedition2.Core.Parse
 {
 	public class ParseExcel
 	{

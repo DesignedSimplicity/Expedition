@@ -5,10 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Expedition2.Core2.Services
+namespace Expedition2.Core.Services
 {
 	public class QueryFileSystem
 	{
+		private void UpdateState(QueryFileSystemRequest request, QueryFileSystemResponse response, BaseFileSytemState state)
+		{
+			//response.State.Add(state);
+			//request.OnQueryFileSystemStateChange?.Invoke(state);
+		}
+
 		public QueryFileSystemResponse Execute(QueryFileSystemRequest request)
 		{
 			// check input uri
@@ -38,13 +44,14 @@ namespace Expedition2.Core2.Services
 					{
 						files.Add(file);
 						execute.SetState(new BaseFileSytemState(file));
+
 					}
 					catch (Exception ex)
 					{
 						// log exception and re-throw if not silent
 						response.Errors.Add(file.FullName, ex);
 						execute.SetState(new BaseFileSytemState(file, ex));
-						if (!request.Silent) throw;
+						if (!request.Silent) throw ex;
 					}
 				}
 				if (request.Recursive)
@@ -66,7 +73,7 @@ namespace Expedition2.Core2.Services
 									// log exception and re-throw if not silent
 									response.Errors.Add(file.FullName, ex);
 									execute.SetState(new BaseFileSytemState(file, ex));
-									if (!request.Silent) throw;
+									if (!request.Silent) throw ex;
 								}
 							}
 						}
@@ -75,7 +82,7 @@ namespace Expedition2.Core2.Services
 							// log exception and re-throw if not silent
 							response.Errors.Add(sub.FullName, ex);
 							//execute.SetState(new ChecksumSystemState(sub, ChecksumSystemStatus.Unknown, ex));
-							if (!request.Silent) throw;
+							if (!request.Silent) throw ex;
 						}
 					}
 				}
@@ -92,7 +99,7 @@ namespace Expedition2.Core2.Services
 				{
 					// log exception and re-throw if not silent
 					response.Errors.Add($"Directory = {dir?.FullName}", ex);
-					if (!request.Silent) throw;
+					if (!request.Silent) throw ex;
 				}
 			}
 
