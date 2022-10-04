@@ -14,7 +14,7 @@ namespace Expedition2.Scout
 
 	internal class PatrolEngine
 	{
-		private readonly Factory _factory = new Factory();
+		private readonly PatrolFactory _factory = new PatrolFactory();
 
 		public void DoCommon(CommonOptions c)
 		{

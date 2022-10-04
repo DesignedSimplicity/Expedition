@@ -8,7 +8,7 @@ using Expedition2.Core;
 
 namespace Expedition2.Core
 {
-	public class Factory
+	public class PatrolFactory
 	{
 		private int _fileId = 0;
 		private int _folderId = 0;

@@ -18,17 +18,17 @@ namespace Expedition2.Core.Services
 		/// <summary>
 		/// Used to make output path relative
 		/// </summary>
-		public string RelativeToUri { get; set; }
+		public string? RelativeToUri { get; set; }
 
 		/// <summary>
 		/// Text writer for status logging output
 		/// </summary>
-		public TextWriter LogStream { get; set; }
+		public TextWriter? LogStream { get; set; }
 
 		/// <summary>
 		/// Console writer for status display output
 		/// </summary>
-		public TextWriter ConsoleOut { get; set; }
+		public TextWriter? ConsoleOut { get; set; }
 
 		/// <summary>
 		/// Checks access without creating hashes
@@ -45,25 +45,27 @@ namespace Expedition2.Core.Services
 	{
 		public new CreateChecksumsRequest Request => (CreateChecksumsRequest)base.Request;
 
-		public string OutputFileUri { get; set; }
+		public string? OutputFileUri { get; set; }
 
-		public string ReportFileUri { get; set; }
+		public string? ReportFileUri { get; set; }
 
-		private int _truncateLength = 0;
+		private int _truncateUriLength = 0;
 
 		public CreateChecksumsExecute(CreateChecksumsRequest request) : base(request)
 		{
 			// set up truncation
 			if (!String.IsNullOrWhiteSpace(Request.RelativeToUri))
-				_truncateLength = ParsePath.FixUri(Request.RelativeToUri, true).Length;
+			{
+				_truncateUriLength = ParsePath.FixUri(Request.RelativeToUri, true).Length;
+			}
 		}
 
-		public string GetOuputPath(string uri) { return _truncateLength > 0 ? uri.Substring(_truncateLength) : uri; }
+		public string GetOuputPath(string uri) { return _truncateUriLength > 0 ? uri.Substring(_truncateUriLength) : uri; }
 	}
 
 	public class CreateChecksumsResponse : ChecksumsResponse
 	{
-		public string OutputFileUri { get; set; }
+		public string? OutputFileUri { get; set; }
 
 		public CreateChecksumsResponse(CreateChecksumsExecute execute) : base(execute.Request)
 		{

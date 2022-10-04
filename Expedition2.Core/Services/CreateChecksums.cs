@@ -14,20 +14,19 @@ namespace Expedition2.Core.Services
 {
 	public class CreateChecksums
 	{
-		public void Validate() { }
-		public void Prepare() { }
-		public void Execute() { }
-		public void Review() { }
-		public void Output() { }
-		public void Report() { }
-
 		public CreateChecksumsResponse Execute(CreateChecksumsRequest request)
 		{
 			var execute = new CreateChecksumsExecute(request);
 
 			Validate(execute);
 
+			Prepare(execute);
+
 			Execute(execute);
+
+			Output(execute);
+
+			Report(execute);
 
 			return new CreateChecksumsResponse(execute);
 		}
@@ -69,43 +68,51 @@ namespace Expedition2.Core.Services
 			}
 		}
 
-		private void Execute(CreateChecksumsExecute execute)
+		private void Prepare(CreateChecksumsExecute execute)
 		{
-			var factory = new Factory();
-
-			// set up console
-			TextWriter console = execute.Request.ConsoleOut;
-			Console.WriteLine($"==================================================");
-
 			var root = new DirectoryInfo(execute.Request.DirectoryUri);
-			var patrol = factory.CreateNew(root);
-			console.WriteLine(root.FullName.Pastel(Color.Orange));
-			console.WriteLine($"--------------------------------------------------");
-			List<FolderPatrolInfo> patrolFolders = factory.LoadFolders(root.FullName, true).ToList();
-			patrolFolders.Insert(0, factory.GetFolder(root));
+			var patrol = execute.Factory.CreateNew(root);
+			execute.PatrolSource = patrol;
+
+			execute.Request.ConsoleOut?.WriteLine($"====================================================================================================");
+			execute.Request.ConsoleOut?.WriteLine(root.FullName.Pastel(Color.Orange));
+			execute.LogLine(root.FullName);
+
+			execute.Request.ConsoleOut?.WriteLine($"----------------------------------------------------------------------------------------------------");
+			List<FolderPatrolInfo> patrolFolders = execute.Factory.LoadFolders(root.FullName, true).ToList();
+			patrolFolders.Insert(0, execute.Factory.GetFolder(root));
+			execute.PatrolFolders = patrolFolders;			
 			foreach (var folder in patrolFolders)
 			{
-				Console.WriteLine(folder.Uri.Pastel(Color.Yellow));
+				execute.Request.ConsoleOut?.WriteLine(folder.Uri.Pastel(Color.Yellow));
+				execute.LogLine(folder.Uri);
 				patrol.TotalFolderCount++;
 			}
-			console.WriteLine($"--------------------------------------------------");
-			console.WriteLine($"Folders: {patrol.TotalFolderCount}");
-			console.WriteLine($"==================================================");
 
+			execute.Request.ConsoleOut?.WriteLine($"----------------------------------------------------------------------------------------------------");
+			execute.Request.ConsoleOut?.WriteLine($"Folders: {patrol.TotalFolderCount}");
+			execute.Request.ConsoleOut?.WriteLine($"====================================================================================================");
+		}
+
+		private void Execute(CreateChecksumsExecute execute)
+		{
+			var console = execute.Request.ConsoleOut;
+
+			var files = new List<FileInfo>();
+			var patrolFiles = new List<FilePatrolInfo>();
+			var patrolFolders = execute.PatrolFolders;
+
+			// query file system
+			var query = new QueryFileSystem();
+			execute.Request.ErrorSafe = true;
+			var queryResult = query.Execute(execute.Request);
 
 			long totalDataProcessed = 0;
 			var hasher = execute.Request.HashType.ToString();
 			using (var algorithm = HashCalc.GetHashAlgorithm(execute.Request.HashType))
 			{
-				// query file system
-				var query = new QueryFileSystem();
-				execute.Request.ErrorSafe = true;
-				var queryResult = query.Execute(execute.Request);
-
 				// enumerate and hash files
 				int count = 0;
-				var files = new List<FileInfo>();
-				var patrolFiles = new List<FilePatrolInfo>();
 				FolderPatrolInfo? currentFolder = null;
 				foreach (var file in queryResult.Files)
 				{
@@ -130,11 +137,11 @@ namespace Expedition2.Core.Services
 						count++;
 						files.Add(file);
 
-						patrol.TotalFileCount++;
-						patrol.TotalFileSize += file.Length;
+						execute.PatrolSource.TotalFileCount++;
+						execute.PatrolSource.TotalFileSize += file.Length;
 						if (folder != null)
 						{
-							patrol.TotalFolderCount++;
+							execute.PatrolSource.TotalFolderCount++;
 							folder.TotalFileCount++;
 							folder.TotalFileSize += file.Length;
 						}
@@ -164,7 +171,7 @@ namespace Expedition2.Core.Services
 						}
 
 						// update patrol file
-						var patrolFile = factory.GetFile(file);
+						var patrolFile = execute.Factory.GetFile(file);
 						if (execute.Request.HashType == HashType.Sha512) patrolFile.Sha512 = hash; else patrolFile.Md5 = hash;
 						patrolFiles.Add(patrolFile);
 
@@ -191,74 +198,79 @@ namespace Expedition2.Core.Services
 						// TODO - deal with missing patrol file
 					}
 				}
-
-				// gather data files
-				execute.PatrolSource = patrol;
-				execute.PatrolFolders = patrolFolders.ToArray();
-				execute.PatrolFiles = patrolFiles.ToArray();
-				execute.Files = files.ToArray();
-
-				// show folders summary
-				console.WriteLine($"==================================================");
-				foreach (var folder in patrolFolders)
-				{
-					console.WriteLine($"{folder.Uri.Pastel(Color.Yellow)}\tFiles: {folder.TotalFileCount:###,###,###,###,###,##0}\tSize: {folder.TotalFileSize:###,###,###,###,###,##0}");
-					patrol.TotalFolderCount++;
-				}
-
-				// show finaly summary
-				console.WriteLine($"--------------------------------------------------");
-				console.Write(patrol.TargetFolderUri.Pastel(Color.DarkOrange));
-				console.WriteLine($"\tFolders: {patrol.TotalFolderCount:###,###,###,###,###,##0}\tFiles: {patrol.TotalFileCount:###,###,###,###,###,##0}\tSize: {patrol.TotalFileSize:###,###,###,###,###,##0}".Pastel(Color.WhiteSmoke));
-
-				// show output
-				var time = DateTime.Now.Subtract(execute.Request.Started);
-				patrol.TotalSeconds = Convert.ToInt64(time.TotalSeconds);
-
-				var mb = totalDataProcessed / 1024.0 / 1024.0;
-				var gb = mb / 1024;
-				var tb = gb / 1024;
-				var gbh = gb / time.TotalHours;
-				var mbs = mb / time.TotalMinutes;
-				console.WriteLine($"==================================================");
-				console.WriteLine($"BYTES: {totalDataProcessed:###,###,###,###,###,##0} = {gb:###,###,###,###,###,##0} GB = {tb:###,###,###,###,###,##0} TB".Pastel(Color.DarkGoldenrod));
-				console.WriteLine($"TIME: {time:hh\\:mm\\:ss} H:M:S = {time.TotalSeconds:###,###,###,###,##0} SEC".Pastel(Color.Goldenrod));
-				console.WriteLine($"RATE: {gbh:##,##0.0} GB/HOUR = {mbs:##,##0.0} MB/SEC".Pastel(Color.Gold));
-
-				if (queryResult.Errors.Count > 0)
-				{
-					console.WriteLine($"##################################################".Pastel(Color.DarkRed));
-					console.WriteLine($"QUERY ERRORS: {queryResult.Errors.Count}".Pastel(Color.Red));
-					execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
-				}
-				if (execute.Exceptions.Count > 0)
-				{
-					console.WriteLine($"##################################################".Pastel(Color.DarkRed));
-					console.WriteLine($"EXCEPTIONS: {execute.Exceptions.Count()}".Pastel(Color.Red));
-					execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
-				}
-
-				// create output files
-				Output(execute);
-				Report(execute);
 			}
 
-			console.WriteLine($"==================================================".Pastel(Color.DarkCyan));
+			// gather data files
+			//execute.PatrolSource = patrol;
+			//execute.PatrolFolders = patrolFolders.ToArray();
+			execute.PatrolFiles = patrolFiles;
+			execute.Files = files.ToArray();
+
+			// show folders summary
+			console?.WriteLine($"====================================================================================================");
+			foreach (var folder in patrolFolders)
+			{
+				console?.WriteLine($"{folder.Uri.Pastel(Color.Yellow)}\tFiles: {folder.TotalFileCount:###,###,###,###,###,##0}\tSize: {folder.TotalFileSize:###,###,###,###,###,##0}");
+				execute.PatrolSource.TotalFolderCount++;
+			}
+
+			// show finaly summary
+			console?.WriteLine($"----------------------------------------------------------------------------------------------------".Pastel(Color.Yellow));
+			console?.Write(execute.PatrolSource.TargetFolderUri.Pastel(Color.DarkOrange));
+			console?.WriteLine($"\tFolders: {execute.PatrolSource.TotalFolderCount:###,###,###,###,###,##0}\tFiles: {execute.PatrolSource.TotalFileCount:###,###,###,###,###,##0}\tSize: {execute.PatrolSource.TotalFileSize:###,###,###,###,###,##0}".Pastel(Color.WhiteSmoke));
+
+			// show output
+			var time = DateTime.Now.Subtract(execute.Request.Started);
+			execute.PatrolSource.TotalSeconds = Convert.ToInt64(time.TotalSeconds);
+
+			var mb = totalDataProcessed / 1024.0 / 1024.0;
+			var gb = mb / 1024;
+			var tb = gb / 1024;
+			var gbh = gb / time.TotalHours;
+			var mbs = mb / time.TotalMinutes;
+			console?.WriteLine($"====================================================================================================".Pastel(Color.DarkOrange));
+			console?.WriteLine($"BYTES: {totalDataProcessed:###,###,###,###,###,##0} = {gb:###,###,###,###,###,##0} GB = {tb:###,###,###,###,###,##0} TB".Pastel(Color.DarkGoldenrod));
+			console?.WriteLine($"TIME: {time:hh\\:mm\\:ss} H:M:S = {time.TotalSeconds:###,###,###,###,##0} SEC".Pastel(Color.Goldenrod));
+			console?.WriteLine($"RATE: {gbh:##,##0.0} GB/HOUR = {mbs:##,##0.0} MB/SEC".Pastel(Color.Gold));
+
+			if (queryResult.Errors.Count > 0)
+			{
+				console?.WriteLine($"####################################################################################################".Pastel(Color.DarkRed));
+				console?.WriteLine($"QUERY ERRORS: {queryResult.Errors.Count}".Pastel(Color.Red));
+				execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
+			}
+			if (execute.Exceptions.Count > 0)
+			{
+				console?.WriteLine($"####################################################################################################".Pastel(Color.DarkRed));
+				console?.WriteLine($"EXCEPTIONS: {execute.Exceptions.Count()}".Pastel(Color.Red));
+				execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
+			}
+
+			console?.WriteLine($"====================================================================================================".Pastel(Color.Cyan));
 		}
 
 		private void Output(CreateChecksumsExecute execute)
 		{
 			// set up hashing
-			StreamWriter? output = null;
-			if (!execute.Request.Preview)
+			if (execute.Request.Preview || String.IsNullOrEmpty(execute.OutputFileUri))
 			{
-				output = File.CreateText(execute.OutputFileUri);
+				return;
 			}
 
-			// create md5/sha512 output file
-			output?.WriteLine($"# Generated {execute.Request.HashType.ToString()} with Patrol at {DateTime.UtcNow}");
-			output?.WriteLine($"# https://github.com/DesignedSimplicity/Expedition/");
-			output?.WriteLine("");
+			execute.Request.ConsoleOut?.Write($"SAVING {execute.PatrolFiles.Count()} {execute.Request.HashType} HASHES: {execute.OutputFileUri}".Pastel(Color.Cyan));
+			execute.Log($"SAVING {execute.PatrolFiles.Count()} {execute.Request.HashType} HASHES: {execute.OutputFileUri}");
+
+			// create md5/sha512 output file header
+			StreamWriter output = File.CreateText(execute.OutputFileUri);
+			// TODO: Write out structured summary here
+			// TODO: Write out structured summary here
+			// TODO: Write out structured summary here
+			// TODO: Write out structured summary here
+			// TODO: Write out structured summary here
+			// TODO: Write out structured summary here
+			output.WriteLine($"# Generated {execute.Request.HashType.ToString()} with Patrol at {DateTime.UtcNow}");
+			output.WriteLine($"# https://github.com/DesignedSimplicity/Expedition/");
+			output.WriteLine("");
 
 			// format and write checksum to stream
 			foreach (var file in execute.PatrolFiles)
@@ -268,38 +280,40 @@ namespace Expedition2.Core.Services
 			}
 
 			// clean up output file
-			if (output != null)
-			{
-				execute.Request.ConsoleOut?.WriteLine($"==================================================".Pastel(Color.Cyan));
-				execute.Request.ConsoleOut?.WriteLine($"SAVING HASHES: {execute.OutputFileUri}".Pastel(Color.Cyan));
-				execute.LogLine($"SAVING HASHES: {execute.OutputFileUri}");
-				output?.Flush();
-				output?.Close();
-				output?.Dispose();
-			}
+			execute.LogLine($"\tDONE");
+			execute.Request.ConsoleOut?.WriteLine($"\tDONE".Pastel(Color.Cyan));
+			output.Flush();
+			output.Close();
+			output.Dispose();
 		}
 
 		private void Report(CreateChecksumsExecute execute)
 		{
-			// set up reporting
-			if (execute.Request.Report)
+			if (!execute.Request.Report || String.IsNullOrWhiteSpace(execute.ReportFileUri))
 			{
-				ParseExcel report = new ParseExcel();
-				report.StartFileSheet();
-
-				// format and write checksum to stream
-				foreach (var file in execute.PatrolFiles)
-				{
-					//var path = execute.GetOuputPath(file.Uri);
-					var f = new FileInfo(file.Uri);
-					report?.AddFileInfo(f, "Create", file.Md5);
-				}
-
-				// close out report
-				execute.Request.ConsoleOut?.WriteLine($"SAVING REPORT: {execute.ReportFileUri}".Pastel(Color.Cyan));
-				execute.LogLine($"SAVING REPORT: {execute.ReportFileUri}");
-				report.SaveAs(execute.ReportFileUri);
+				return;
 			}
+
+			execute.Request.ConsoleOut?.Write($"SAVING PATROL REPORT: {execute.ReportFileUri}".Pastel(Color.Cyan));
+			execute.Log($"SAVING PATROL REPORT: {execute.ReportFileUri}".Pastel(Color.Cyan));
+
+			// set up reporting
+			ParseExcel report = new ParseExcel();
+			report.StartFileSheet();
+
+			// format and write checksum to stream
+			foreach (var file in execute.PatrolFiles)
+			{
+				//var path = execute.GetOuputPath(file.Uri);
+				var f = new FileInfo(file.Uri);
+				report?.AddFileInfo(f, "Create", file.Md5);
+			}
+
+			// close out report
+			execute.LogLine($"\tDONE");
+			execute.Request.ConsoleOut?.WriteLine($"\tDONE".Pastel(Color.Cyan));
+			report.SaveAs(execute.ReportFileUri);
+			report.Dispose();
 		}
 	}
 }

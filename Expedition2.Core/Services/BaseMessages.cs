@@ -151,14 +151,19 @@ namespace Expedition2.Core.Services
 
 		public FileInfo[] Files { get; set; }
 
+		public PatrolFactory Factory { get; set; }
 		public SourcePatrolInfo PatrolSource { get; set; }
-		public FolderPatrolInfo[] PatrolFolders { get; set; }
-		public FilePatrolInfo[] PatrolFiles { get; set; }
+		public List<FolderPatrolInfo> PatrolFolders { get; set; }
+		public List<FilePatrolInfo> PatrolFiles { get; set; }
 
 		public Dictionary<string, Exception> Exceptions { get; private set; } = new Dictionary<string, Exception>();
 
 
-		public ChecksumsExecute(IChecksumsRequest request) : base((IBaseRequest)request) { _checksumsRequest = request; }
+		public ChecksumsExecute(IChecksumsRequest request) : base((IBaseRequest)request)
+		{ 
+			_checksumsRequest = request; 
+			Factory = new PatrolFactory();
+		}
 
 
 		public void Log(string text) { _checksumsRequest.LogStream?.Write(text); }

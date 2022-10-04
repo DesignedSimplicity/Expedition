@@ -17,7 +17,7 @@ namespace Expedition2.Patrol
 
 	internal class Engine
 	{
-		private readonly Factory _factory = new Factory();
+		private readonly PatrolFactory _factory = new PatrolFactory();
 
 		public void DoCommon(CommonOptions c)
 		{
