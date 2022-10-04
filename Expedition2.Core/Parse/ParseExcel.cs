@@ -16,7 +16,7 @@ namespace Expedition2.Core.Parse
 		private const string MoneyFormat = "$###,###,##0.00";
 		private const string DateFormat = "yyyy-MM-dd";
 
-		private readonly ExcelPackage _excel = new ExcelPackage();
+		private readonly ExcelPackage _excel;
 
 		private ExcelWorksheet _summary;
 		private ExcelWorksheet _folders;
@@ -30,6 +30,7 @@ namespace Expedition2.Core.Parse
 		public ParseExcel()
 		{
 			ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+			_excel = new ExcelPackage();
 			_summary = NewWorksheet("Summary");
 			_folders = NewWorksheet("Folders");
 			_files = NewWorksheet("Files");

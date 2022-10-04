@@ -56,7 +56,8 @@ namespace Expedition2.Core.Services
 			// set up truncation
 			if (!String.IsNullOrWhiteSpace(Request.RelativeToUri))
 			{
-				_truncateUriLength = ParsePath.FixUri(Request.RelativeToUri, true).Length;
+				Request.RelativeToUri = ParsePath.FixUri(Request.RelativeToUri, true);
+				_truncateUriLength = Request.RelativeToUri.Length;
 			}
 		}
 

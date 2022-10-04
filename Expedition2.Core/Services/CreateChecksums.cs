@@ -124,7 +124,13 @@ namespace Expedition2.Core.Services
 						continue;
 
 					// match to folder
-					var folder = patrolFolders.FirstOrDefault(x => x.Uri == file.DirectoryName); // TODO BAD
+					// TODO BAD MATCH - make better, add caching from previous
+					// TODO BAD MATCH - make better, add caching from previous
+					// TODO BAD MATCH - make better, add caching from previous
+					// TODO BAD MATCH - make better, add caching from previous
+					// TODO BAD MATCH - make better, add caching from previous
+					// TODO BAD MATCH - make better, add caching from previous
+					var folder = patrolFolders.FirstOrDefault(x => x.Uri == file.DirectoryName);
 					if (currentFolder?.Uri != folder?.Uri)
 					{
 						console?.WriteLine(folder?.Uri.Pastel(Color.Yellow));
@@ -201,8 +207,6 @@ namespace Expedition2.Core.Services
 			}
 
 			// gather data files
-			//execute.PatrolSource = patrol;
-			//execute.PatrolFolders = patrolFolders.ToArray();
 			execute.PatrolFiles = patrolFiles;
 			execute.Files = files.ToArray();
 
@@ -223,13 +227,13 @@ namespace Expedition2.Core.Services
 			var time = DateTime.Now.Subtract(execute.Request.Started);
 			execute.PatrolSource.TotalSeconds = Convert.ToInt64(time.TotalSeconds);
 
-			var mb = totalDataProcessed / 1024.0 / 1024.0;
-			var gb = mb / 1024;
-			var tb = gb / 1024;
-			var gbh = gb / time.TotalHours;
-			var mbs = mb / time.TotalMinutes;
+			var mb = 1.0 * totalDataProcessed / 1024.0 / 1024.0;
+			var gb = 1.0 * mb / 1024;
+			var tb = 1.0 * gb / 1024.0;
+			var gbh = 1.0 * gb / time.TotalHours;
+			var mbs = 1.0 * mb / time.TotalMinutes;
 			console?.WriteLine($"====================================================================================================".Pastel(Color.DarkOrange));
-			console?.WriteLine($"BYTES: {totalDataProcessed:###,###,###,###,###,##0} = {gb:###,###,###,###,###,##0} GB = {tb:###,###,###,###,###,##0} TB".Pastel(Color.DarkGoldenrod));
+			console?.WriteLine($"BYTES: {totalDataProcessed:###,###,###,###,###,##0} = {mb:###,###,###,###,###,##0.0} MB = {gb:###,###,###,###,###,##0.0} GB = {tb:###,###,###,###,###,##0.0} TB".Pastel(Color.DarkGoldenrod));
 			console?.WriteLine($"TIME: {time:hh\\:mm\\:ss} H:M:S = {time.TotalSeconds:###,###,###,###,##0} SEC".Pastel(Color.Goldenrod));
 			console?.WriteLine($"RATE: {gbh:##,##0.0} GB/HOUR = {mbs:##,##0.0} MB/SEC".Pastel(Color.Gold));
 
@@ -262,18 +266,25 @@ namespace Expedition2.Core.Services
 
 			// create md5/sha512 output file header
 			StreamWriter output = File.CreateText(execute.OutputFileUri);
-			// TODO: Write out structured summary here
-			// TODO: Write out structured summary here
-			// TODO: Write out structured summary here
-			// TODO: Write out structured summary here
-			// TODO: Write out structured summary here
-			// TODO: Write out structured summary here
-			output.WriteLine($"# Generated {execute.Request.HashType.ToString()} with Patrol at {DateTime.UtcNow}");
+			output.WriteLine($"# Generated {execute.Request.HashType} with Patrol at UTC {DateTime.UtcNow}");
 			output.WriteLine($"# https://github.com/DesignedSimplicity/Expedition/");
+			output.WriteLine($"# ==================================================");
+			output.WriteLine($"# System Name: {Environment.MachineName}");
+			output.WriteLine($"# Patrol Source: {execute.PatrolSource.SourcePatrolUri}");
+			output.WriteLine($"# Target Folder: {execute.PatrolSource.TargetFolderUri}");
+			output.WriteLine($"# Hash: {execute.Request.HashType}");
+			output.WriteLine($"# Size: {execute.PatrolSource.TotalFileSize:###,###,###,###,###,##0}");
+			output.WriteLine($"# Files: {execute.PatrolSource.TotalFileCount:###,###,###,###,###,##0}");
+			output.WriteLine($"# Folders: {execute.PatrolSource.TotalFolderCount:###,###,###,###,###,##0}");
+			output.WriteLine($"# --------------------------------------------------");
+			foreach (var folder in execute.PatrolFolders.OrderBy(x => x.Uri))
+			{
+				output.WriteLine($"# Files: {folder.TotalFileCount:###,###,###,###,###,##0}\tSize: {folder.TotalFileSize:###,###,###,###,###,##0}\t\t{folder.Uri}");
+			}
 			output.WriteLine("");
 
 			// format and write checksum to stream
-			foreach (var file in execute.PatrolFiles)
+			foreach (var file in execute.PatrolFiles.OrderBy(x => x.Uri))
 			{
 				var path = execute.GetOuputPath(file.Uri);
 				output?.WriteLine($"{file.Md5} {path}");
@@ -302,7 +313,7 @@ namespace Expedition2.Core.Services
 			report.StartFileSheet();
 
 			// format and write checksum to stream
-			foreach (var file in execute.PatrolFiles)
+			foreach (var file in execute.PatrolFiles.OrderBy(x => x.Uri))
 			{
 				//var path = execute.GetOuputPath(file.Uri);
 				var f = new FileInfo(file.Uri);
