@@ -11,6 +11,11 @@ namespace Expedition2.Core.Services
 	public class CreateChecksumsRequest : QueryFileSystemRequest, IChecksumsRequest
 	{
 		/// <summary>
+		/// Name to prefix output files
+		/// </summary>
+		public string? NamePrefix { get; set; }
+
+		/// <summary>
 		/// Decides which hash algorithm to use
 		/// </summary>
 		public HashType HashType { get; set; } = HashType.Md5;

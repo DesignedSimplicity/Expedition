@@ -53,18 +53,21 @@ namespace Expedition2.Core.Services
 			var path = String.IsNullOrWhiteSpace(root)
 				? dir
 				: root;
-			var name = $"_{now:yyyyMMdd}-{now:HHmmss}";
+
+			// prefix filename if provided
+			if (!String.IsNullOrWhiteSpace(execute.Request.NamePrefix) && !ParsePath.IsValidFilename(execute.Request.NamePrefix)) throw new Exception($"Output filename prefix' {execute.Request.NamePrefix}' is not valid");
+			var outputName = $"{execute.Request.NamePrefix}_{now:yyyyMMdd}-{now:HHmmss}";
 
 			// check hash file
-			var hash = Path.Combine(path, $"{name}.{ext}");
-			if (File.Exists(hash)) throw new Exception($"Output hash file '{name}' already exists");
+			var hash = Path.Combine(path, $"{outputName}.{ext}");
+			if (File.Exists(hash)) throw new Exception($"Output hash file '{outputName}' already exists");
 			execute.OutputFileUri = hash;
 
 			// check excel file
 			if (execute.Request.Report)
 			{
-				var excel = Path.Combine(path, $"{name}.xlsx");
-				if (File.Exists(excel)) throw new Exception($"Output report file '{name}' already exists");
+				var excel = Path.Combine(path, $"{outputName}.xlsx");
+				if (File.Exists(excel)) throw new Exception($"Output report file '{outputName}' already exists");
 				execute.ReportFileUri = excel;
 			}
 		}
@@ -88,24 +91,6 @@ namespace Expedition2.Core.Services
 				var patrolFolder = new FolderPatrolInfo(dir);
 				execute.PatrolFolders.Add(patrolFolder);
 				execute.PatrolSource.TotalFolderCount++;
-				/*
-				try
-				{
-					var patrolFolder = new FolderPatrolInfo(dir);
-					execute.PatrolFolders.Add(patrolFolder);
-				}
-				catch (UnauthorizedAccessException ex)
-				{
-					// log exception and re-throw if not silent
-					execute.LogError(dir.FullName, ex);
-					if (execute.Request.ErrorSafe)
-					{
-						execute.Request.ConsoleOut?.Write($"FOLDER ERROR: {dir.FullName}=".Pastel(Color.Red));
-						execute.Request.ConsoleOut?.WriteLine(ex.ToString().Pastel(Color.DarkRed));
-					}
-					else
-						throw;
-				}*/
 			}
 			execute.Request.ConsoleOut?.WriteLine($"----------------------------------------------------------------------------------------------------");
 			foreach (var patrolFolder in execute.PatrolFolders)
@@ -123,28 +108,6 @@ namespace Expedition2.Core.Services
 					execute.PatrolSource.TotalFileSize += file.Length;
 
 					execute.Request.ConsoleOut?.Write('.');
-					/*
-					try
-					{
-						var patrolFile = new FilePatrolInfo(file);
-						execute.PatrolFiles.Add(patrolFile);
-						patrolFolder.Files.Add(patrolFile);
-
-						execute.PatrolSource.TotalFileCount++;
-						execute.PatrolSource.TotalFileSize += file.Length;
-					}
-					catch (UnauthorizedAccessException ex)
-					{
-						// log exception and re-throw if not silent
-						execute.LogError(file.FullName, ex);
-						if (execute.Request.ErrorSafe)
-						{
-							execute.Request.ConsoleOut?.Write($"FILE ERROR: {file.FullName}=".Pastel(Color.Red));
-							execute.Request.ConsoleOut?.WriteLine(ex.ToString().Pastel(Color.DarkRed));
-						}
-						else
-							throw;
-					}*/
 				}
 				execute.Request.ConsoleOut?.WriteLine();
 			}

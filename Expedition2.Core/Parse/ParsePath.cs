@@ -12,6 +12,20 @@ namespace Expedition2.Core
 		private const string _slashString = @"\";
 		private const string _slashDouble = @"\\";
 
+		public static bool IsValidFilename(string? fileName)
+		{
+			if (String.IsNullOrWhiteSpace(fileName))
+				return false;
+
+			foreach (var c in Path.GetInvalidFileNameChars())
+			{
+				if (fileName.ToCharArray().Contains(c)) return false;
+			}
+
+			return true;
+		}
+
+
 		/// <summary>
 		/// Checks if the uri matches a network path format (starts with \\)
 		/// </summary>

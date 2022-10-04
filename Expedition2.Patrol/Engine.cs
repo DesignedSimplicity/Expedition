@@ -21,12 +21,13 @@ namespace Expedition2.Patrol
 
 		public void DoCommon(CommonOptions c)
 		{
-			Console.WriteLine($"Name:\t{c.Name}");
-			Console.WriteLine($"Silent:\t{c.Silent}");
-			Console.WriteLine($"Pause:\t{c.Pause}");
+			Console.WriteLine($"Name:\t{c.StartUri}");
+			//Console.WriteLine($"Silent:\t{c.Silent}");
+			//Console.WriteLine($"Pause:\t{c.Pause}");
 			Console.WriteLine($"Log:\t{c.Log}");
-			Console.WriteLine($"Error:\t{c.Error}");
+			//Console.WriteLine($"Error:\t{c.Error}");
 			Console.WriteLine($"Report:\t{c.Report}");
+			Console.WriteLine($"Report:\t{c.Preview}");
 		}
 
 		public void DoVerify(VerifyOptions v)
@@ -38,19 +39,6 @@ namespace Expedition2.Patrol
 
 
 
-		private void DisplayPatrolSummary(SourcePatrolInfo patrol)
-		{
-			// display patrol estimate
-			Console.WriteLine($"==================================================");
-			Console.WriteLine($"Patrol Source Uri:\t{patrol.SourcePatrolUri}");
-			Console.WriteLine($"Folder Target Uri:\t{patrol.TargetFolderUri}");
-			Console.WriteLine($"Total Folder Count:\t{patrol.TotalFolderCount:###,###,###,###,###,##0}");
-			Console.WriteLine($"Total File Count:\t{patrol.TotalFileCount:###,###,###,###,###,##0}");
-			Console.WriteLine($"Total File Size:\t{patrol.TotalFileSize:###,###,###,###,###,##0}".Pastel(Color.DarkGray));
-			Console.WriteLine($"");
-		}
-
-
 		public void DoCreate(CreateOptions c)
 		{
 			DoCommon(c);
@@ -59,19 +47,26 @@ namespace Expedition2.Patrol
 			Console.WriteLine($"Filter:\t{c.Filter}");
 
 			// access source directory if exists, assume current if null
-			var sourceUri = Directory.Exists(c.Name) ? c.Name : Environment.CurrentDirectory;
+			var sourceUri = "";
+			if (String.IsNullOrWhiteSpace(c.StartUri))
+				sourceUri = ParsePath.FixUri(Environment.CurrentDirectory, true);
+			else if (c.StartUri.Contains(Path.DirectorySeparatorChar) && Directory.Exists(c.StartUri))
+				sourceUri = ParsePath.FixUri(c.StartUri, true);
+			else
+				sourceUri = c.StartUri;
 
 			// prepare service request
 			var request = new CreateChecksumsRequest()
 			{
+				NamePrefix = c.Name,
 				HashType = c.Sha512 ? HashType.Sha512 : HashType.Md5,
-				DirectoryUri = ParsePath.FixUri(sourceUri, true),
-				RelativeToUri = ParsePath.FixUri(sourceUri, true),
+				DirectoryUri = sourceUri,
+				RelativeToUri = sourceUri,
 				FilePattern = c.Filter ?? "*.*",
 				Report = c.Report,
-				Preview = false,
-				//LogStream = Console.Out,
+				Preview = c.Preview,
 				ConsoleOut = Console.Out,
+				//LogStream = Console.Out,
 				Recursive = true,
 				ErrorSafe = true,
 		};
