@@ -77,17 +77,76 @@ namespace Expedition2.Core.Services
 
 			execute.Request.ConsoleOut?.WriteLine($"====================================================================================================");
 			execute.Request.ConsoleOut?.WriteLine(root.FullName.Pastel(Color.Orange));
-			execute.LogLine(root.FullName);
 
 			execute.Request.ConsoleOut?.WriteLine($"----------------------------------------------------------------------------------------------------");
-			List<FolderPatrolInfo> patrolFolders = execute.Factory.LoadFolders(root.FullName, true).ToList();
-			patrolFolders.Insert(0, execute.Factory.GetFolder(root));
-			execute.PatrolFolders = patrolFolders;			
-			foreach (var folder in patrolFolders)
+			execute.Request.ConsoleOut?.WriteLine(root.FullName.Pastel(Color.Yellow));
+			execute.PatrolFolders.Add(new FolderPatrolInfo(root));
+			execute.PatrolSource.TotalFolderCount = 1;
+
+			foreach (var dir in root.EnumerateDirectories("*", new EnumerationOptions() { IgnoreInaccessible = true, RecurseSubdirectories = true }).OrderBy(x => x.FullName))
 			{
-				execute.Request.ConsoleOut?.WriteLine(folder.Uri.Pastel(Color.Yellow));
-				execute.LogLine(folder.Uri);
-				patrol.TotalFolderCount++;
+				var patrolFolder = new FolderPatrolInfo(dir);
+				execute.PatrolFolders.Add(patrolFolder);
+				execute.PatrolSource.TotalFolderCount++;
+				/*
+				try
+				{
+					var patrolFolder = new FolderPatrolInfo(dir);
+					execute.PatrolFolders.Add(patrolFolder);
+				}
+				catch (UnauthorizedAccessException ex)
+				{
+					// log exception and re-throw if not silent
+					execute.LogError(dir.FullName, ex);
+					if (execute.Request.ErrorSafe)
+					{
+						execute.Request.ConsoleOut?.Write($"FOLDER ERROR: {dir.FullName}=".Pastel(Color.Red));
+						execute.Request.ConsoleOut?.WriteLine(ex.ToString().Pastel(Color.DarkRed));
+					}
+					else
+						throw;
+				}*/
+			}
+			execute.Request.ConsoleOut?.WriteLine($"----------------------------------------------------------------------------------------------------");
+			foreach (var patrolFolder in execute.PatrolFolders)
+			{
+				var dir = new DirectoryInfo(patrolFolder.Uri);
+				execute.Request.ConsoleOut?.Write(dir.FullName.Pastel(Color.Yellow));
+				execute.LogLine(dir.FullName);
+				foreach (var file in dir.EnumerateFiles(execute.Request.FilePattern, new EnumerationOptions() { IgnoreInaccessible = true, RecurseSubdirectories = false }))
+				{
+					var patrolFile = new FilePatrolInfo(file);
+					execute.PatrolFiles.Add(patrolFile);
+					patrolFolder.Files.Add(patrolFile);
+
+					execute.PatrolSource.TotalFileCount++;
+					execute.PatrolSource.TotalFileSize += file.Length;
+
+					execute.Request.ConsoleOut?.Write('.');
+					/*
+					try
+					{
+						var patrolFile = new FilePatrolInfo(file);
+						execute.PatrolFiles.Add(patrolFile);
+						patrolFolder.Files.Add(patrolFile);
+
+						execute.PatrolSource.TotalFileCount++;
+						execute.PatrolSource.TotalFileSize += file.Length;
+					}
+					catch (UnauthorizedAccessException ex)
+					{
+						// log exception and re-throw if not silent
+						execute.LogError(file.FullName, ex);
+						if (execute.Request.ErrorSafe)
+						{
+							execute.Request.ConsoleOut?.Write($"FILE ERROR: {file.FullName}=".Pastel(Color.Red));
+							execute.Request.ConsoleOut?.WriteLine(ex.ToString().Pastel(Color.DarkRed));
+						}
+						else
+							throw;
+					}*/
+				}
+				execute.Request.ConsoleOut?.WriteLine();
 			}
 
 			execute.Request.ConsoleOut?.WriteLine($"----------------------------------------------------------------------------------------------------");
@@ -99,66 +158,30 @@ namespace Expedition2.Core.Services
 		{
 			var console = execute.Request.ConsoleOut;
 
-			var files = new List<FileInfo>();
-			var patrolFiles = new List<FilePatrolInfo>();
+			var patrol = execute.PatrolSource;
+			var patrolFiles = execute.PatrolFiles;
 			var patrolFolders = execute.PatrolFolders;
-
-			// query file system
-			var query = new QueryFileSystem();
-			execute.Request.ErrorSafe = true;
-			var queryResult = query.Execute(execute.Request);
 
 			long totalDataProcessed = 0;
 			var hasher = execute.Request.HashType.ToString();
 			using (var algorithm = HashCalc.GetHashAlgorithm(execute.Request.HashType))
 			{
-				// enumerate and hash files
 				int count = 0;
-				FolderPatrolInfo? currentFolder = null;
-				foreach (var file in queryResult.Files)
+				foreach(var folder in patrolFolders)
 				{
-					string hash = "";
-					var fileName = file.FullName;
-
-					// exclude/skip output file
-					if (String.Compare(execute.OutputFileUri, fileName, true) == 0)
-						continue;
-
-					// match to folder
-					// TODO BAD MATCH - make better, add caching from previous
-					// TODO BAD MATCH - make better, add caching from previous
-					// TODO BAD MATCH - make better, add caching from previous
-					// TODO BAD MATCH - make better, add caching from previous
-					// TODO BAD MATCH - make better, add caching from previous
-					// TODO BAD MATCH - make better, add caching from previous
-					var folder = patrolFolders.FirstOrDefault(x => x.Uri == file.DirectoryName);
-					if (currentFolder?.Uri != folder?.Uri)
-					{
-						console?.WriteLine(folder?.Uri.Pastel(Color.Yellow));
-						currentFolder = folder;
-					}
-
-					// process the next file
-					try
+					console?.WriteLine(folder.Uri.Pastel(Color.Yellow));
+					foreach (var file in folder.Files)
 					{
 						count++;
-						files.Add(file);
+						string hash = "";
+						var fileName = file.Uri;
 
-						execute.PatrolSource.TotalFileCount++;
-						execute.PatrolSource.TotalFileSize += file.Length;
-						if (folder != null)
-						{
-							execute.PatrolSource.TotalFolderCount++;
-							folder.TotalFileCount++;
-							folder.TotalFileSize += file.Length;
-						}
+						totalDataProcessed += file.FileSize;
 
-						execute.SetState(new BaseFileSytemState(file));
-						execute.Log($"{count}. {fileName} -> {file.Length:###,###,###,###,##0}");
-
-						console?.Write($"{count}. ".Pastel(Color.WhiteSmoke));
+						execute.Log($"{count:###,###,###,###,##0} of {patrol.TotalFileCount:###,###,###,###,##0} {fileName} -> {file.FileSize:###,###,###,###,##0}");
+						console?.Write($"[{count:###,###,###,###,##0} of {patrol.TotalFileCount:###,###,###,###,##0}] ".Pastel(Color.Gray));
 						console?.Write($"{file.Name} -> ");
-						console?.Write($"{file.Length:###,###,###,###,##0}".Pastel(Color.LightYellow));
+						console?.Write($"{file.FileSize:###,###,###,###,##0}".Pastel(Color.LightYellow));
 
 						if (execute.Request.Preview)
 						{
@@ -168,63 +191,58 @@ namespace Expedition2.Core.Services
 						else
 						{
 							// calculate hash and output hash to log
+							console?.Write($" {hasher.Pastel(Color.LightGreen)} = ");
 							var s = new Stopwatch();
 							s.Start();
-							hash = HashCalc.GetHash(fileName, algorithm);
-							var rate = file.Length / (s.ElapsedMilliseconds + 1);
-							s.Stop();
-							execute.LogLine($" {hasher} = {hash} @ {rate:###,###,###,###,##0} b/ms");
-							console?.WriteLine($" {hasher.Pastel(Color.LightGreen)} = {hash.Pastel(Color.Green)} @ {rate:###,###,###,###,##0} b/ms".Pastel(Color.Gray));
+							try
+							{
+								hash = HashCalc.GetHash(fileName, algorithm);
+								var rate = file.FileSize / (s.ElapsedMilliseconds + 1);
+								s.Stop();
+								execute.LogLine($" {hasher} = {hash} @ {rate:###,###,###,###,##0} b/ms");
+								console?.WriteLine($"{hash.Pastel(Color.Green)} @ {rate:###,###,###,###,##0} b/ms".Pastel(Color.Gray));
+
+								file.FileStatus = FileStatus.Exists;
+								if (!execute.Request.Preview)
+								{
+									if (execute.Request.HashType == HashType.Sha512)
+									{
+										file.Sha512 = hash;
+										file.Sha512Status = HashStatus.Created;
+										file.LastVerified = DateTime.UtcNow;
+									}
+									else
+									{
+										file.Md5 = hash;
+										file.Md5Status = HashStatus.Created;
+										file.LastVerified = DateTime.UtcNow;
+									}
+								}
+							}
+							catch (UnauthorizedAccessException ex)
+							{
+								s.Stop();
+								file.FileStatus = FileStatus.Error;
+
+								// log exception and re-throw if not silent
+								execute.LogError(fileName, ex);
+								if (execute.Request.ErrorSafe)
+								{
+									console?.WriteLine($"UnauthorizedAccessException".Pastel(Color.Red));
+								}
+								else
+									throw;
+							}
 						}
 
-						// update patrol file
-						var patrolFile = execute.Factory.GetFile(file);
-						patrolFile.FileStatus = FileStatus.Exists;
-						if (!execute.Request.Preview)
-						{
-							if (execute.Request.HashType == HashType.Sha512)
-							{
-								patrolFile.Sha512 = hash;
-								patrolFile.Sha512Status = HashStatus.Created;
-								patrolFile.LastVerified = DateTime.UtcNow;
-							}
-							else
-							{
-								patrolFile.Md5 = hash;
-								patrolFile.Md5Status = HashStatus.Created;
-								patrolFile.LastVerified = DateTime.UtcNow;
-							}
-						}
-						patrolFiles.Add(patrolFile);
 
-
-						// update file data state
-						totalDataProcessed += file.Length;
-						execute.SetState(new BaseFileSytemState(file, hash));
-
-						// write report data if requested
-						//report?.AddFileInfo(file, null, hash);
-					}
-					catch (Exception ex)
-					{
-						execute.LogError(fileName, ex);
-						execute.SetState(new BaseFileSytemState(file, ex));
-						//report?.AddFileInfo(file, null, hash, ex.Message);
-
-						if (!execute.Request.ErrorSafe) throw;
-
-						// TODO - deal with missing patrol file
-						// TODO - deal with missing patrol file
-						// TODO - deal with missing patrol file
-						// TODO - deal with missing patrol file
-						// TODO - deal with missing patrol file
 					}
 				}
 			}
 
 			// gather data files
-			execute.PatrolFiles = patrolFiles;
-			execute.Files = files.ToArray();
+			//execute.PatrolFiles = patrolFiles;
+			//execute.Files = files.ToArray();
 
 			// show folders summary
 			console?.WriteLine($"====================================================================================================");
@@ -252,6 +270,7 @@ namespace Expedition2.Core.Services
 			console?.WriteLine($"TIME: {time:hh\\:mm\\:ss} H:M:S = {time.TotalSeconds:###,###,###,###,##0} SEC".Pastel(Color.Goldenrod));
 			console?.WriteLine($"RATE: {gbh:##,##0.0} GB/HOUR = {mbs:##,##0.0} MB/SEC".Pastel(Color.Gold));
 
+			/*
 			if (queryResult.Errors.Count > 0)
 			{
 				console?.WriteLine($"####################################################################################################".Pastel(Color.DarkRed));
@@ -260,11 +279,12 @@ namespace Expedition2.Core.Services
 				foreach (var error in queryResult.Errors)
 				{
 					console?.Write($"{error.Key}=".Pastel(Color.Red));
-					console?.Write(error.Value.ToString().Pastel(Color.DarkRed));
+					console?.WriteLine(error.Value.ToString().Pastel(Color.DarkRed));
 					execute.LogLine($"{error.Key}={error.Value}");
 				}
 				
 			}
+			*/
 			if (execute.Exceptions.Count > 0)
 			{
 				console?.WriteLine($"####################################################################################################".Pastel(Color.DarkRed));

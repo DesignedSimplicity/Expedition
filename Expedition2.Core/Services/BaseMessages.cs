@@ -153,8 +153,8 @@ namespace Expedition2.Core.Services
 
 		public PatrolFactory Factory { get; set; }
 		public SourcePatrolInfo PatrolSource { get; set; }
-		public List<FolderPatrolInfo> PatrolFolders { get; set; }
-		public List<FilePatrolInfo> PatrolFiles { get; set; }
+		public List<FolderPatrolInfo> PatrolFolders { get; set; } = new List<FolderPatrolInfo>();
+		public List<FilePatrolInfo> PatrolFiles { get; set; } = new List<FilePatrolInfo>();
 
 		public Dictionary<string, Exception> Exceptions { get; private set; } = new Dictionary<string, Exception>();
 

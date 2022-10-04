@@ -80,8 +80,8 @@ namespace Expedition2.Scout
 				patrol.TotalFolderCount++;
 
 				var list = _factory.LoadFiles(folder.Uri, false, filter);
-				folder.TotalFileCount = list.Count();
-				folder.TotalFileSize += list.Sum(x => x.FileSize);
+				//folder.TotalFileCount = list.Count();
+				//folder.TotalFileSize += list.Sum(x => x.FileSize);
 
 				Console.WriteLine($"\tFiles: {folder.TotalFileCount:###,###,###,###,###,##0}\tSize: {folder.TotalFileSize:###,###,###,###,###,##0}");
 				files.AddRange(list);

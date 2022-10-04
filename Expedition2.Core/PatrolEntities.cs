@@ -9,10 +9,15 @@ namespace Expedition2.Core
 	public enum SourceType { FileSystem, PatrolSource };
 	public enum HashType { Md5 = 0, Sha1 = 1, Sha512 = 512}
 	public enum HashStatus { Unknown = 0, Created = 1, Updated = 2, Verified = 3 }
-	public enum FileStatus { Unknown = 0, Exists = 1, Missing = -1 }
+	public enum FileStatus { Unknown = 0, Exists = 1, Missing = -1, Error = -9999 }
 
 	public class SourcePatrolInfo
 	{
+		public Guid Guid = Guid.NewGuid();
+
+		/// <summary>
+		/// Machine name
+		/// </summary>
 		public string SystemName;
 
 		/// <summary>
@@ -45,14 +50,28 @@ namespace Expedition2.Core
 	public class FolderPatrolInfo : CompoundInfo
 	{
 		// summary
-		public long TotalFileCount;
-		public long TotalFileSize;
+		public long TotalFileCount => Files.Count;
+		public long TotalFileSize => Files.Sum(x => x.FileSize);
 
-		int FolderStatus;	// Offline/Online/Verified/Warning/Errors
+		//int FolderStatus;	// Offline/Online/Verified/Warning/Errors
 
-		string Description; // put into aggregate readme file
+		public string Description; // put into aggregate readme file
 
 		//SourcePatrolInfo[] Patrols; // list of hash files associated directly with this folder or file
+
+		public List<FilePatrolInfo> Files = new List<FilePatrolInfo>();
+
+		public FolderPatrolInfo(DirectoryInfo d)
+		{
+			Guid = Guid.NewGuid();
+			Uri = d.FullName;
+			Name = d.Name;
+
+			Created = d.CreationTimeUtc;
+			Updated = d.LastWriteTimeUtc;
+
+			Description = string.Empty;
+		}
 	}
 
 	public class FilePatrolInfo : CompoundInfo
@@ -70,21 +89,39 @@ namespace Expedition2.Core
 		public HashStatus Md5Status = HashStatus.Unknown;
 		public HashStatus Sha512Status = HashStatus.Unknown;
 
+		/*
 		bool IsStatic;      // file should never change (camera raws)
 		bool IsUnique;      // file name is unique (enough to trust)
 		bool IsConstant;    // file key/path/name is globally unique
 		bool IsExcluded;    // ignore this file
+		*/
 
-		string Notes;
-		string Tags;
+		public string Notes;
+		public string Tags;
 
-		//SourcePatrolInfo Patrol;
+		public FilePatrolInfo(FileInfo f)
+		{
+			Guid = Guid.NewGuid();
+			Uri = f.FullName;
+
+			Name = f.Name;
+			Path = f.Directory?.FullName ?? "";
+			Directory = f.Directory?.Name ?? "";
+
+			Extension = f.Extension.ToUpperInvariant().TrimStart('.');
+			FileSize = f.Length;
+
+			Created = f.CreationTimeUtc;
+			Updated = f.LastWriteTimeUtc;
+
+			Notes = string.Empty;
+			Tags = string.Empty;
+		}
 	}
 
-	public class CompoundInfo
+	public abstract class CompoundInfo
 	{
 		// unique
-		public int Id;
 		public Guid Guid;
 		public string Uri;
 

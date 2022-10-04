@@ -10,9 +10,6 @@ namespace Expedition2.Core
 {
 	public class PatrolFactory
 	{
-		private int _fileId = 0;
-		private int _folderId = 0;
-
 		public SourcePatrolInfo CreateNew(DirectoryInfo d, string? baseFileName = null)
 		{
 			var name = baseFileName ?? DateTime.Now.ToString("yyyyMMdd-HHmmss");
@@ -51,37 +48,12 @@ namespace Expedition2.Core
 
 		public FolderPatrolInfo GetFolder(DirectoryInfo d)
 		{
-			var x = new FolderPatrolInfo();
-			x.Id = ++_folderId;
-			x.Guid = Guid.NewGuid();
-			x.Uri = d.FullName;
-			x.Name = d.Name;
-
-			x.Created = d.CreationTimeUtc;
-			x.Updated = d.LastWriteTimeUtc;
-
-			return x;
+			return new FolderPatrolInfo(d);
 		}
 
 		public FilePatrolInfo GetFile(FileInfo f)
 		{
-			var x = new FilePatrolInfo();
-
-			x.Id = ++_fileId;
-			x.Guid = Guid.NewGuid();
-			x.Uri = f.FullName;
-
-			x.Name = f.Name;
-			x.Directory = f.Directory?.Name ?? "";
-			x.Path = f.Directory?.FullName ?? "";
-
-			x.Extension = f.Extension.ToUpperInvariant().TrimStart('.');
-			x.FileSize = f.Length;
-
-			x.Created = f.CreationTimeUtc;
-			x.Updated = f.LastWriteTimeUtc;
-
-			return x;
+			return new FilePatrolInfo(f);
 		}
 
 		public IEnumerable<FolderPatrolInfo> LoadFolders(string uri, bool recursive = false)

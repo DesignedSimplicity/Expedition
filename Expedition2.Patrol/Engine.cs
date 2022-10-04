@@ -65,15 +65,16 @@ namespace Expedition2.Patrol
 			var request = new CreateChecksumsRequest()
 			{
 				HashType = c.Sha512 ? HashType.Sha512 : HashType.Md5,
-				DirectoryUri = ParsePath.FixUri(sourceUri),
-				RelativeToUri = ParsePath.FixUri(sourceUri),
-				FilePattern = c.Filter ?? "",
+				DirectoryUri = ParsePath.FixUri(sourceUri, true),
+				RelativeToUri = ParsePath.FixUri(sourceUri, true),
+				FilePattern = c.Filter ?? "*.*",
 				Report = c.Report,
 				Preview = false,
 				//LogStream = Console.Out,
 				ConsoleOut = Console.Out,
 				Recursive = true,
-			};
+				ErrorSafe = true,
+		};
 
 			// create and execute service request
 			var create = new CreateChecksums();

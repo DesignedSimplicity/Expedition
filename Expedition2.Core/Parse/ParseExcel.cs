@@ -91,6 +91,7 @@ namespace Expedition2.Core.Parse
 			_sources.Cells[row, col++].Value = "ExId";
 			_sources.Cells[row, col++].Value = "Guid";
 			_sources.Cells[row, col++].Value = "SystemName";
+			_sources.Cells[row, col++].Value = "PatrolName";
 			_sources.Cells[row, col++].Value = "PatrolType";
 			_sources.Cells[row, col++].Value = "HashType";
 			_sources.Cells[row, col++].Value = "SourcePatrolUri";
@@ -107,8 +108,9 @@ namespace Expedition2.Core.Parse
 				row++;
 				col = 1;
 				_sources.Cells[row, col++].Value = row - 1;
-				_sources.Cells[row, col++].Value = "TODO"; // source.Guid;
+				_sources.Cells[row, col++].Value = source.Guid.ToString();
 				_sources.Cells[row, col++].Value = source.SystemName;
+				_sources.Cells[row, col++].Value = source.PatrolName;
 				_sources.Cells[row, col++].Value = source.SourceType.ToString();
 				_sources.Cells[row, col++].Value = source.HashType.ToString();
 				_sources.Cells[row, col++].Value = source.SourcePatrolUri;
@@ -122,12 +124,12 @@ namespace Expedition2.Core.Parse
 			}
 
 			_sources.Column(1).Style.Numberformat.Format = NumberFormat;
-			_sources.Column(8).Style.Numberformat.Format = NumberFormat;
 			_sources.Column(9).Style.Numberformat.Format = NumberFormat;
 			_sources.Column(10).Style.Numberformat.Format = NumberFormat;
 			_sources.Column(11).Style.Numberformat.Format = NumberFormat;
-			_sources.Column(12).Style.Numberformat.Format = DateFormat;
+			_sources.Column(12).Style.Numberformat.Format = NumberFormat;
 			_sources.Column(13).Style.Numberformat.Format = DateFormat;
+			_sources.Column(14).Style.Numberformat.Format = DateFormat;
 		}
 
 		public void PopulateFolders(IEnumerable<FolderPatrolInfo> folders)
@@ -181,11 +183,11 @@ namespace Expedition2.Core.Parse
 				_files.Cells[_fileRow, col++].Value = file.Name;
 				_files.Cells[_fileRow, col++].Value = file.Extension;
 				_files.Cells[_fileRow, col++].Value = file.FileSize;
-				_files.Cells[_fileRow, col++].Value = file.FileStatus.ToString();
+				_files.Cells[_fileRow, col++].Value = file.FileStatus == FileStatus.Unknown ? "" : file.FileStatus.ToString();
 				_files.Cells[_fileRow, col++].Value = file.Md5;
-				_files.Cells[_fileRow, col++].Value = file.Md5Status.ToString();
+				_files.Cells[_fileRow, col++].Value = file.Md5Status == HashStatus.Unknown ? "" : file.Md5Status.ToString();
 				_files.Cells[_fileRow, col++].Value = file.Sha512;
-				_files.Cells[_fileRow, col++].Value = file.Sha512Status.ToString();
+				_files.Cells[_fileRow, col++].Value = file.Sha512Status == HashStatus.Unknown ? "" : file.Sha512Status.ToString();
 				_files.Cells[_fileRow, col++].Value = file.Created;
 				_files.Cells[_fileRow, col++].Value = file.Updated;
 				_files.Cells[_fileRow, col++].Value = file.LastVerified;
