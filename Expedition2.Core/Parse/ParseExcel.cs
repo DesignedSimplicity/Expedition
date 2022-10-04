@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using CommandLine;
+using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
@@ -14,24 +15,24 @@ namespace Expedition2.Core.Parse
 		private const string PercentFormat = "#0.0%";
 		private const string NumberFormat = "###,###,##0";
 		private const string MoneyFormat = "$###,###,##0.00";
-		private const string DateFormat = "yyyy-MM-dd";
+		private const string DateFormat = "yyyy-MM-dd HH:mm:ss";
 
-		private readonly ExcelPackage _excel;
+		private readonly ExcelPackage _package;
 
-		private ExcelWorksheet _summary;
+		private ExcelWorksheet _sources;
 		private ExcelWorksheet _folders;
 		private ExcelWorksheet _files;
 
-		private bool _head = false;
-		private bool _foot = false;
-		private int _row;
-		private int _col;
+		private bool _fileHead = false;
+		private bool _fileFoot = false;
+		private int _fileRow;
+		private int folderCol;
 
 		public ParseExcel()
 		{
 			ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-			_excel = new ExcelPackage();
-			_summary = NewWorksheet("Summary");
+			_package = new ExcelPackage();
+			_sources = NewWorksheet("Sources");
 			_folders = NewWorksheet("Folders");
 			_files = NewWorksheet("Files");
 		}
@@ -40,35 +41,26 @@ namespace Expedition2.Core.Parse
 		{
 			var excel = new FileInfo(uri);
 
-			if (!_foot) FinishFileSheet();
+			if (!_fileFoot) FinishFileSheet();
 
-			_excel.SaveAs(excel);
-			_summary.Dispose();
-			_folders.Dispose();
-			_files.Dispose();
-			_excel.Dispose();
+			_package.SaveAs(excel);
 		}
 
 		public void Dispose()
 		{
-			_summary.Dispose();
+			_sources.Dispose();
 			_folders.Dispose();
 			_files.Dispose();
-			_excel.Dispose();
+			_package.Dispose();
 		}
 
 		private ExcelWorksheet NewWorksheet(string name)
 		{
-			var ws = _excel.Workbook.Worksheets.Add(name);
+			var ws = _package.Workbook.Worksheets.Add(name);
 			ws.Row(1).Style.Fill.PatternType = ExcelFillStyle.Solid;
 			ws.Row(1).Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Black);
 			ws.Row(1).Style.Font.Color.SetColor(System.Drawing.Color.White);
 			return ws;
-		}
-
-		private void AddWorksheet(string name)
-		{
-			_files = NewWorksheet(name);
 		}
 
 		private void AutoFormatColumns(int count, string format)
@@ -87,64 +79,162 @@ namespace Expedition2.Core.Parse
 			}
 		}
 
+		public void PopulateSource(SourcePatrolInfo source)
+		{
+			PopulateSources(new List<SourcePatrolInfo> { source });
+		}
+
+		public void PopulateSources(IEnumerable<SourcePatrolInfo> sources)
+		{
+			var row = 1;
+			var col = 1;
+			_sources.Cells[row, col++].Value = "ExId";
+			_sources.Cells[row, col++].Value = "Guid";
+			_sources.Cells[row, col++].Value = "SystemName";
+			_sources.Cells[row, col++].Value = "PatrolType";
+			_sources.Cells[row, col++].Value = "HashType";
+			_sources.Cells[row, col++].Value = "SourcePatrolUri";
+			_sources.Cells[row, col++].Value = "TargetFolderUri";
+			_sources.Cells[row, col++].Value = "TotalFileSize";
+			_sources.Cells[row, col++].Value = "TotalFileCount";
+			_sources.Cells[row, col++].Value = "TotalFolderCount";
+			_sources.Cells[row, col++].Value = "TotalSeconds";
+			_sources.Cells[row, col++].Value = "CreatedUTC";
+			_sources.Cells[row, col++].Value = "UpdatedUTC";
+
+			foreach (var source in sources)
+			{
+				row++;
+				col = 1;
+				_sources.Cells[row, col++].Value = row - 1;
+				_sources.Cells[row, col++].Value = "TODO"; // source.Guid;
+				_sources.Cells[row, col++].Value = source.SystemName;
+				_sources.Cells[row, col++].Value = source.SourceType.ToString();
+				_sources.Cells[row, col++].Value = source.HashType.ToString();
+				_sources.Cells[row, col++].Value = source.SourcePatrolUri;
+				_sources.Cells[row, col++].Value = source.TargetFolderUri;
+				_sources.Cells[row, col++].Value = source.TotalFileSize;
+				_sources.Cells[row, col++].Value = source.TotalFileCount;
+				_sources.Cells[row, col++].Value = source.TotalFolderCount;
+				_sources.Cells[row, col++].Value = source.TotalSeconds;
+				_sources.Cells[row, col++].Value = source.Created;
+				_sources.Cells[row, col++].Value = source.Updated;
+			}
+
+			_sources.Column(1).Style.Numberformat.Format = NumberFormat;
+			_sources.Column(8).Style.Numberformat.Format = NumberFormat;
+			_sources.Column(9).Style.Numberformat.Format = NumberFormat;
+			_sources.Column(10).Style.Numberformat.Format = NumberFormat;
+			_sources.Column(11).Style.Numberformat.Format = NumberFormat;
+			_sources.Column(12).Style.Numberformat.Format = DateFormat;
+			_sources.Column(13).Style.Numberformat.Format = DateFormat;
+		}
+
+		public void PopulateFolders(IEnumerable<FolderPatrolInfo> folders)
+		{
+			var row = 1;
+			var col = 1;
+			_folders.Cells[row, col++].Value = "ExId";
+			_folders.Cells[row, col++].Value = "Guid";
+			_folders.Cells[row, col++].Value = "FullUri";
+			_folders.Cells[row, col++].Value = "DirectoryName";
+			_folders.Cells[row, col++].Value = "TotalFileCount";
+			_folders.Cells[row, col++].Value = "TotalFileSize";
+			_folders.Cells[row, col++].Value = "CreatedUTC";
+			_folders.Cells[row, col++].Value = "UpdatedUTC";
+
+			foreach (var folder in folders)
+			{
+				row++;
+				col = 1;
+				_folders.Cells[row, col++].Value = row - 1;
+				_folders.Cells[row, col++].Value = folder.Guid;
+				_folders.Cells[row, col++].Value = folder.Uri;
+				_folders.Cells[row, col++].Value = folder.Name;
+				_folders.Cells[row, col++].Value = folder.TotalFileCount;
+				_folders.Cells[row, col++].Value = folder.TotalFileSize;
+				_folders.Cells[row, col++].Value = folder.Created;
+				_folders.Cells[row, col++].Value = folder.Updated;
+			}
+
+			_folders.Column(1).Style.Numberformat.Format = NumberFormat;
+			_folders.Column(5).Style.Numberformat.Format = NumberFormat;
+			_folders.Column(6).Style.Numberformat.Format = NumberFormat;
+			_folders.Column(7).Style.Numberformat.Format = DateFormat;
+			_folders.Column(8).Style.Numberformat.Format = DateFormat;
+		}
+
+		public void PopulateFiles(IEnumerable<FilePatrolInfo> files)
+		{
+			if (!_fileHead) StartFileSheet();
+
+			foreach (var file in files)
+			{
+				_fileRow++;
+				var exid = _fileRow - 1;
+
+				var col = 1;
+				_files.Cells[_fileRow, col++].Value = exid;
+				_files.Cells[_fileRow, col++].Value = file.Guid;
+				_files.Cells[_fileRow, col++].Value = file.Uri;
+				_files.Cells[_fileRow, col++].Value = file.Directory;
+				_files.Cells[_fileRow, col++].Value = file.Name;
+				_files.Cells[_fileRow, col++].Value = file.Extension;
+				_files.Cells[_fileRow, col++].Value = file.FileSize;
+				_files.Cells[_fileRow, col++].Value = file.FileStatus.ToString();
+				_files.Cells[_fileRow, col++].Value = file.Md5;
+				_files.Cells[_fileRow, col++].Value = file.Md5Status.ToString();
+				_files.Cells[_fileRow, col++].Value = file.Sha512;
+				_files.Cells[_fileRow, col++].Value = file.Sha512Status.ToString();
+				_files.Cells[_fileRow, col++].Value = file.Created;
+				_files.Cells[_fileRow, col++].Value = file.Updated;
+				_files.Cells[_fileRow, col++].Value = file.LastVerified;
+			}
+
+			FinishFileSheet();
+		}
+
 		public void StartFileSheet()
 		{
-			AddWorksheet("Expedition.Files");
-
-			_head = true;
-			_row = 1;
-			_col = 1;
-
-			_files.Cells[_row, _col++].Value = "ExId";
-			_files.Cells[_row, _col++].Value = "Status";
-			_files.Cells[_row, _col++].Value = "Exception";
-			_files.Cells[_row, _col++].Value = "Uri";
-			_files.Cells[_row, _col++].Value = "Directory";
-			_files.Cells[_row, _col++].Value = "File";
-			_files.Cells[_row, _col++].Value = "Type";
-			_files.Cells[_row, _col++].Value = "Size";
-			_files.Cells[_row, _col++].Value = "Hash";
-			_files.Cells[_row, _col++].Value = "Created";
-			_files.Cells[_row, _col++].Value = "Modified";
+			_fileHead = true;
+			_fileRow = 1;
+			folderCol = 1;
+			_files.Cells[_fileRow, folderCol++].Value = "ExId";
+			_files.Cells[_fileRow, folderCol++].Value = "Guid";
+			_files.Cells[_fileRow, folderCol++].Value = "FullUri";
+			_files.Cells[_fileRow, folderCol++].Value = "DirectoryName";
+			_files.Cells[_fileRow, folderCol++].Value = "FileName";
+			_files.Cells[_fileRow, folderCol++].Value = "FileExtension";
+			_files.Cells[_fileRow, folderCol++].Value = "FileSize";
+			_files.Cells[_fileRow, folderCol++].Value = "FileStatus";
+			_files.Cells[_fileRow, folderCol++].Value = "Md5";
+			_files.Cells[_fileRow, folderCol++].Value = "Md5Status";
+			_files.Cells[_fileRow, folderCol++].Value = "Sha512";
+			_files.Cells[_fileRow, folderCol++].Value = "Sha512Status";
+			_files.Cells[_fileRow, folderCol++].Value = "CreatedUTC";
+			_files.Cells[_fileRow, folderCol++].Value = "UpdatedUTC";
+			_files.Cells[_fileRow, folderCol++].Value = "VerifiedUTC";
 		}
 
 
 		public void AddFileInfo(FileInfo file, string status = null, string hash = null, string error = null)
 		{
-			if (!_head) StartFileSheet();
-
-			_row++;
-			var exid = _row - 1;
-
-			var col = 1;
-			if (String.IsNullOrWhiteSpace(status)) status = String.IsNullOrWhiteSpace(hash) ? "INFO" : "HASH";
-			if (String.IsNullOrWhiteSpace(hash)) hash = "";
-			if (String.IsNullOrWhiteSpace(error)) error = "";
-			_files.Cells[_row, col++].Value = exid;
-			_files.Cells[_row, col++].Value = status;
-			_files.Cells[_row, col++].Value = error;
-			_files.Cells[_row, col++].Value = file.FullName;
-			_files.Cells[_row, col++].Value = file.Directory.Name;
-			_files.Cells[_row, col++].Value = file.Name;
-			_files.Cells[_row, col++].Value = file.Extension;
-			_files.Cells[_row, col++].Value = file.Length;
-			_files.Cells[_row, col++].Value = hash;
-			_files.Cells[_row, col++].Value = file.CreationTimeUtc;
-			_files.Cells[_row, col++].Value = file.LastWriteTimeUtc;
 		}
 
 		public void FinishFileSheet()
 		{
-			_foot = true;
+			_fileFoot = true;
 
 			// do auto formatting
-			AutoFormatColumns(_col - 3, NumberFormat);
+			//AutoFormatColumns(7, NumberFormat);
+			_files.Column(7).Style.Numberformat.Format = NumberFormat;
 
 			// do manual formatting
 			//_worksheet.Column(_col).Style.Numberformat.Format = _percentFormat;
 			//_worksheet.Column(_col).Style.Numberformat.Format = _moneyFormat;
-			_files.Column(_col - 2).Style.Numberformat.Format = DateFormat;
-			_files.Column(_col - 1).Style.Numberformat.Format = DateFormat;
+			_files.Column(13).Style.Numberformat.Format = DateFormat;
+			_files.Column(14).Style.Numberformat.Format = DateFormat;
+			_files.Column(15).Style.Numberformat.Format = DateFormat;
 
 			// auto size columns
 			//AutoFitColumns(_col - 1);

@@ -230,6 +230,7 @@ namespace Expedition2.Core.Services
 					execute.LogLine($"--------------------------------------------------");
 					execute.LogLine($"SAVING REPORT: {execute.ReportFileUri}");
 					report.SaveAs(execute.ReportFileUri);
+					report.Dispose();
 				}
 
 			}

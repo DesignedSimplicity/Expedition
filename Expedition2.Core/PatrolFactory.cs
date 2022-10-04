@@ -25,6 +25,12 @@ namespace Expedition2.Core
 			p.SourcePatrolUri = Path.Combine(d.FullName, name) + ".patrol";
 			p.SourceType = SourceType.FileSystem;
 
+			p.SystemName = Environment.MachineName;
+
+			var now = DateTime.UtcNow;
+			p.Created = now;
+			p.Updated = now;
+
 			return p;
 		}
 
@@ -37,6 +43,8 @@ namespace Expedition2.Core
 			p.TargetFolderUri = f.Directory?.FullName ?? "";
 			p.SourcePatrolUri = f.FullName;
 			p.SourceType = SourceType.PatrolSource;
+
+			p.SystemName = Environment.MachineName;
 
 			return p;
 		}
@@ -58,14 +66,16 @@ namespace Expedition2.Core
 		public FilePatrolInfo GetFile(FileInfo f)
 		{
 			var x = new FilePatrolInfo();
+
 			x.Id = ++_fileId;
 			x.Guid = Guid.NewGuid();
 			x.Uri = f.FullName;
 
 			x.Name = f.Name;
+			x.Directory = f.Directory?.Name ?? "";
 			x.Path = f.Directory?.FullName ?? "";
 
-			x.Extension = f.Extension.ToUpperInvariant();
+			x.Extension = f.Extension.ToUpperInvariant().TrimStart('.');
 			x.FileSize = f.Length;
 
 			x.Created = f.CreationTimeUtc;

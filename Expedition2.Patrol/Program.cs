@@ -16,7 +16,7 @@ namespace Expedition2.Patrol
 
 			var engine = new Engine();
 
-			string[] test = { "create", "N:\\", "--report" };
+			string[] test = { "create", "--report" };
 			var result = parser.ParseArguments<CreateOptions, VerifyOptions>(test)
 				.WithParsed<CreateOptions>(x => engine.DoCreate(x))
 				.WithParsed<VerifyOptions>(x => engine.DoVerify(x));

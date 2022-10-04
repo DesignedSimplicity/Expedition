@@ -1,4 +1,5 @@
-﻿using Expedition2.Core.Parse;
+﻿using CommandLine;
+using Expedition2.Core.Parse;
 using OfficeOpenXml.Style;
 using Pastel;
 using System;
@@ -178,7 +179,22 @@ namespace Expedition2.Core.Services
 
 						// update patrol file
 						var patrolFile = execute.Factory.GetFile(file);
-						if (execute.Request.HashType == HashType.Sha512) patrolFile.Sha512 = hash; else patrolFile.Md5 = hash;
+						patrolFile.FileStatus = FileStatus.Exists;
+						if (!execute.Request.Preview)
+						{
+							if (execute.Request.HashType == HashType.Sha512)
+							{
+								patrolFile.Sha512 = hash;
+								patrolFile.Sha512Status = HashStatus.Created;
+								patrolFile.LastVerified = DateTime.UtcNow;
+							}
+							else
+							{
+								patrolFile.Md5 = hash;
+								patrolFile.Md5Status = HashStatus.Created;
+								patrolFile.LastVerified = DateTime.UtcNow;
+							}
+						}
 						patrolFiles.Add(patrolFile);
 
 
@@ -226,7 +242,6 @@ namespace Expedition2.Core.Services
 			// show output
 			var time = DateTime.Now.Subtract(execute.Request.Started);
 			execute.PatrolSource.TotalSeconds = Convert.ToInt64(time.TotalSeconds);
-
 			var mb = 1.0 * totalDataProcessed / 1024.0 / 1024.0;
 			var gb = 1.0 * mb / 1024;
 			var tb = 1.0 * gb / 1024.0;
@@ -242,12 +257,25 @@ namespace Expedition2.Core.Services
 				console?.WriteLine($"####################################################################################################".Pastel(Color.DarkRed));
 				console?.WriteLine($"QUERY ERRORS: {queryResult.Errors.Count}".Pastel(Color.Red));
 				execute.LogLine($"QUERY ERRORS: {queryResult.Errors.Count}");
+				foreach (var error in queryResult.Errors)
+				{
+					console?.Write($"{error.Key}=".Pastel(Color.Red));
+					console?.Write(error.Value.ToString().Pastel(Color.DarkRed));
+					execute.LogLine($"{error.Key}={error.Value}");
+				}
+				
 			}
 			if (execute.Exceptions.Count > 0)
 			{
 				console?.WriteLine($"####################################################################################################".Pastel(Color.DarkRed));
 				console?.WriteLine($"EXCEPTIONS: {execute.Exceptions.Count()}".Pastel(Color.Red));
 				execute.LogLine($"EXCEPTIONS: {execute.Exceptions.Count()}");
+				foreach(var exception in execute.Exceptions)
+				{
+					console?.Write($"{exception.Key}=".Pastel(Color.Red));
+					console?.WriteLine(exception.Value.ToString().Pastel(Color.DarkRed));
+					execute.LogLine($"{exception.Key}={exception.Value}");
+				}
 			}
 
 			console?.WriteLine($"====================================================================================================".Pastel(Color.Cyan));
@@ -269,7 +297,7 @@ namespace Expedition2.Core.Services
 			output.WriteLine($"# Generated {execute.Request.HashType} with Patrol at UTC {DateTime.UtcNow}");
 			output.WriteLine($"# https://github.com/DesignedSimplicity/Expedition/");
 			output.WriteLine($"# ==================================================");
-			output.WriteLine($"# System Name: {Environment.MachineName}");
+			output.WriteLine($"# System Name: {execute.PatrolSource.SystemName}");
 			output.WriteLine($"# Patrol Source: {execute.PatrolSource.SourcePatrolUri}");
 			output.WriteLine($"# Target Folder: {execute.PatrolSource.TargetFolderUri}");
 			output.WriteLine($"# Hash: {execute.Request.HashType}");
@@ -310,15 +338,11 @@ namespace Expedition2.Core.Services
 
 			// set up reporting
 			ParseExcel report = new ParseExcel();
-			report.StartFileSheet();
 
 			// format and write checksum to stream
-			foreach (var file in execute.PatrolFiles.OrderBy(x => x.Uri))
-			{
-				//var path = execute.GetOuputPath(file.Uri);
-				var f = new FileInfo(file.Uri);
-				report?.AddFileInfo(f, "Create", file.Md5);
-			}
+			report.PopulateSource(execute.PatrolSource);
+			report.PopulateFolders(execute.PatrolFolders.OrderBy(x => x.Uri));
+			report.PopulateFiles(execute.PatrolFiles.OrderBy(x => x.Uri));
 
 			// close out report
 			execute.LogLine($"\tDONE");

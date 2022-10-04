@@ -7,10 +7,14 @@ using System.Threading.Tasks;
 namespace Expedition2.Core
 {
 	public enum SourceType { FileSystem, PatrolSource };
-	public enum HashType { Md5, Sha1, Sha512 }
+	public enum HashType { Md5 = 0, Sha1 = 1, Sha512 = 512}
+	public enum HashStatus { Unknown = 0, Created = 1, Updated = 2, Verified = 3 }
+	public enum FileStatus { Unknown = 0, Exists = 1, Missing = -1 }
 
 	public class SourcePatrolInfo
 	{
+		public string SystemName;
+
 		/// <summary>
 		/// Friendly name for patrol metadata set
 		/// </summary>
@@ -33,6 +37,9 @@ namespace Expedition2.Core
 		public long TotalFileCount;
 		public long TotalFileSize;
 		public long TotalSeconds;
+
+		public DateTime Created;
+		public DateTime? Updated;
 	}
 
 	public class FolderPatrolInfo : CompoundInfo
@@ -51,16 +58,17 @@ namespace Expedition2.Core
 	public class FilePatrolInfo : CompoundInfo
 	{
 		// details
+		public string Directory;
 		public string Extension;
 		//public string FileType;
 		public long FileSize;
 
-		public string Md5;
-		string Sha1;
-		public string Sha512;
+		public string Md5 = string.Empty;
+		public string Sha512 = string.Empty;
 
-		int FileStatus;     // enum flags
-		int HashStatus;     // enum flags
+		public FileStatus FileStatus = FileStatus.Unknown;
+		public HashStatus Md5Status = HashStatus.Unknown;
+		public HashStatus Sha512Status = HashStatus.Unknown;
 
 		bool IsStatic;      // file should never change (camera raws)
 		bool IsUnique;      // file name is unique (enough to trust)
